@@ -216,3 +216,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-022-design-review-calls.md](transcripts/P-022-design-review-calls.md).
 - Result summary: The AI's check found none of the 15 findings wrong; one example in F7 was overstated. The design was updated per finding, and D-030 reworded (no `retryable` flag). Everything is logged in R-013. Design committed.
 - Follow-up: [R-013](../06-ai-review/ai-review-log.md#r-013-independent-review-of-the-m4-design)
+
+## P-023: Close M4
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Answer "y" to "Run /milestone-done now?" after M4.
+- Prompt: Verbatim in [transcripts/P-023-close-m4.md](transcripts/P-023-close-m4.md).
+- Result summary: /milestone-done run for M4: tests and app skipped (no app yet), leak check OK, M4 marked done in the plan, review entries drafted for approval.
+- Follow-up: [R-014](../06-ai-review/ai-review-log.md#r-014-oauth-webhook-assumption-checked-against-slacks-stored-docs), [R-015](../06-ai-review/ai-review-log.md#r-015-slack-example-token-in-a-stored-raw-response) (both approved in P-024)

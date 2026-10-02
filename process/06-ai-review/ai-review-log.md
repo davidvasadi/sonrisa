@@ -214,3 +214,31 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: corrected
 - What changed as a result: The design was updated as in the table. D-030 was reworded: no `retryable` flag. The review caught two bugs that would have reached code, which confirms the plan's decision to have a reviewer with fresh context.
 - Related decision: D-022, D-023, D-027, D-028, D-030
+
+## R-014: OAuth webhook assumption checked against Slack's stored docs
+
+- Date: 2026-10-02
+- Prompt / session: [P-020](../07-prompts/session-log.md#p-020-remove-slack-example-token-write-the-m4-design)
+- What the AI produced: D-007 and D-017 assumed that Slack OAuth with the `incoming-webhook` scope returns a webhook URL, so both Slack paths end in one stored webhook.
+- How I checked it: Before designing the flow, the AI searched the stored OAuth guide ([installing-with-oauth.html](../03-research/raw-responses/slack-docs/installing-with-oauth.html)) for `incoming_webhook`.
+- What I found:
+  - The OAuth guide never mentions it. The `incoming_webhook` object (`channel`, `channel_id`, `configuration_url`, `url`) is documented only on the stored webhook page ([incoming-webhooks.html](../03-research/raw-responses/slack-docs/incoming-webhooks.html)).
+  - Slack's own example `url` there is `https://hooks.slack.com/TXXXXX/…`, without `/services/`.
+- Verdict: accepted. The assumption held, but its evidence was on a different page than expected.
+- What changed as a result: The design cites the webhook page for the OAuth response fields. Webhook validation checks the exact host only, never the path.
+- Related decision: D-007, D-017, D-022
+
+## R-015: Slack example token in a stored raw response
+
+- Date: 2026-10-02
+- Prompt / session: found in [P-019](../07-prompts/session-log.md#p-019-m3-source-decisions) (M3 close), fixed in [P-020](../07-prompts/session-log.md#p-020-remove-slack-example-token-write-the-m4-design)
+- What the AI produced: The M3 commit, with Slack's OAuth doc page stored byte for byte. The page includes a realistic-looking sample bot token in an example response.
+- How I checked it: The M3 secrets scan flagged token patterns. The AI traced every match to Slack's published docs and warned that GitHub secret scanning could still block the push.
+- What I found: It wasn't a credential, but leaving it would likely have blocked the first push. The commit had not been pushed yet.
+- Verdict: corrected
+- What changed as a result:
+  - The one token string was replaced with `[example token removed]`, and the edit is noted in the file's `.meta.txt`.
+  - The M3 commit was amended (`3d087bf`).
+  - `git log --all -S` and `git grep` over all reachable commits find no copy.
+  - Obvious placeholders (`xoxb-1234-abcdefgh`, `xoxp-XXXX…`) were left as fetched.
+- Related decision: none
