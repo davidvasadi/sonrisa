@@ -338,3 +338,15 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
   - **Tests:** a per-category test for all 7 BBC sections and 6 GDACS types checks the category and the item's origin. A mutation (always the first item) fails 12 of them. 96 tests pass.
   - **Logged:** R-026 updated. UN News is still relabelled.
 - Follow-up: [R-026](../06-ai-review/ai-review-log.md#r-026-demo-content-did-not-match-the-chosen-category)
+
+## P-032: UN News demo per feed
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Fix the UN News demo the same way as BBC (one real stored item per feed), with the same test, and commit.
+- Prompt: Verbatim in [transcripts/P-032-un-news-demo-per-feed.md](transcripts/P-032-un-news-demo-per-feed.md).
+- Result summary:
+  - **Demo data:** the first real item of each of the 17 stored UN feeds, gzip-decompressed where needed. 14 UN feeds were added as test fixtures, with checksums.
+  - **Tests:** a per-feed test checks the category and the item's origin. A relabelling mutation fails 15 of the 17; economic development still passes because the same story really is in that feed too. 113 tests pass.
+  - **Logged:** R-026 updated. No demo item is relabelled any more.
+- Follow-up: [R-026](../06-ai-review/ai-review-log.md#r-026-demo-content-did-not-match-the-chosen-category)

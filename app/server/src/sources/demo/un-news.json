@@ -1,9 +1,107 @@
 {
-  "from": "process/03-research/raw-responses/un-news/topic-climate-change.rss, first item, as returned by parse()",
-  "item": {
-    "title": "From energy crisis to energy transition: How renewables are reshaping energy security",
-    "link": "https://news.un.org/feed/view/en/story/2026/09/1168473",
-    "guid": "https://news.un.org/en/story/2026/09/1168473",
-    "pubDate": "Mon, 28 Sep 2026 12:00:00 +0000"
+  "from": "process/03-research/raw-responses/un-news/<topic|region>-<slug>.rss (gzip-decompressed where stored compressed): the first item of each feed, as returned by parse()",
+  "items": {
+    "topic/climate-change": {
+      "title": "From energy crisis to energy transition: How renewables are reshaping energy security",
+      "link": "https://news.un.org/feed/view/en/story/2026/09/1168473",
+      "guid": "https://news.un.org/en/story/2026/09/1168473",
+      "pubDate": "Mon, 28 Sep 2026 12:00:00 +0000"
+    },
+    "topic/humanitarian-aid": {
+      "title": "Ebola response faces setback as transit centre burns down in DR Congo camp",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168499",
+      "guid": "https://news.un.org/en/story/2026/10/1168499",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "topic/peace-and-security": {
+      "title": "World News in Brief: Marshall Islands nuclear legacy, FlyDubai attack condemned, Ukraine update, breast cancer treatment expanded in West Bank",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168503",
+      "guid": "https://news.un.org/en/story/2026/10/1168503",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "topic/economic-development": {
+      "title": "Nepal floods threaten jobs and livelihoods beyond disaster zone: ILO",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168500",
+      "guid": "https://news.un.org/en/story/2026/10/1168500",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "topic/health": {
+      "title": "Gaza: WHO appeals for massive aid influx ahead of winter",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168508",
+      "guid": "https://news.un.org/en/story/2026/10/1168508",
+      "pubDate": "Fri, 02 Oct 2026 12:00:00 +0000"
+    },
+    "topic/human-rights": {
+      "title": "No more execution attempts on Christa Pike: UN rights chief",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168504",
+      "guid": "https://news.un.org/en/story/2026/10/1168504",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "topic/women": {
+      "title": "‘Women are not victims’: Türk calls for women to be at the heart of peace and security",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168502",
+      "guid": "https://news.un.org/en/story/2026/10/1168502",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "topic/law-and-crime-prevention": {
+      "title": "Homicides fall as organised crime grows more profitable – and networked",
+      "link": "https://news.un.org/feed/view/en/story/2026/09/1168493",
+      "guid": "https://news.un.org/en/story/2026/09/1168493",
+      "pubDate": "Wed, 30 Sep 2026 12:00:00 +0000"
+    },
+    "topic/migrants-and-refugees": {
+      "title": "‘I have not lost my dreams’: Refugee education funding cuts threaten millions",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168506",
+      "guid": "https://news.un.org/en/story/2026/10/1168506",
+      "pubDate": "Fri, 02 Oct 2026 12:00:00 +0000"
+    },
+    "topic/un-affairs": {
+      "title": "UN Member States weigh latest Security Council veto, this time on Iran",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168505",
+      "guid": "https://news.un.org/en/story/2026/10/1168505",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "topic/sdgs": {
+      "title": "Who gets to shape AI? UN debate centres on power, trust and inclusion",
+      "link": "https://news.un.org/feed/view/en/story/2026/09/1168498",
+      "guid": "https://news.un.org/en/story/2026/09/1168498",
+      "pubDate": "Wed, 30 Sep 2026 12:00:00 +0000"
+    },
+    "topic/culture-and-education": {
+      "title": "Millions of children return to schools that still can’t provide clean water or a working toilet",
+      "link": "https://news.un.org/feed/view/en/story/2026/09/1168393",
+      "guid": "https://news.un.org/en/story/2026/09/1168393",
+      "pubDate": "Tue, 22 Sep 2026 12:00:00 +0000"
+    },
+    "region/africa": {
+      "title": "Ebola response faces setback as transit centre burns down in DR Congo camp",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168499",
+      "guid": "https://news.un.org/en/story/2026/10/1168499",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "region/americas": {
+      "title": "No more execution attempts on Christa Pike: UN rights chief",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168504",
+      "guid": "https://news.un.org/en/story/2026/10/1168504",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "region/asia-pacific": {
+      "title": "Nepal floods threaten jobs and livelihoods beyond disaster zone: ILO",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168500",
+      "guid": "https://news.un.org/en/story/2026/10/1168500",
+      "pubDate": "Thu, 01 Oct 2026 12:00:00 +0000"
+    },
+    "region/middle-east": {
+      "title": "Gaza: WHO appeals for massive aid influx ahead of winter",
+      "link": "https://news.un.org/feed/view/en/story/2026/10/1168508",
+      "guid": "https://news.un.org/en/story/2026/10/1168508",
+      "pubDate": "Fri, 02 Oct 2026 12:00:00 +0000"
+    },
+    "region/europe": {
+      "title": "Zelenskyy urges stronger pressure on Russia, warns war’s impact is spreading beyond Ukraine",
+      "link": "https://news.un.org/feed/view/en/story/2026/09/1168416",
+      "guid": "https://news.un.org/en/story/2026/09/1168416",
+      "pubDate": "Wed, 23 Sep 2026 12:00:00 +0000"
+    }
   }
 }

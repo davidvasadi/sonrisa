@@ -11,6 +11,7 @@ import { injectDemo } from '../src/inject.js';
 import { seed } from '../src/seed.js';
 import { bbc } from '../src/sources/bbc.js';
 import { gdacs } from '../src/sources/gdacs.js';
+import { unNews } from '../src/sources/un-news.js';
 import { count, fixture, freshDb } from './helpers.js';
 
 // --- Slack mock receiver (D-023): a real local HTTP server. The slack channel gets a transport
@@ -257,6 +258,16 @@ describe('demo inject goes through the whole pipeline (D-017)', () => {
     const raw = JSON.parse((t.db.prepare('SELECT raw FROM events WHERE id = ?').get(eventId) as { raw: string }).raw) as { guid: string };
     const sectionFeed = bbc.parse(fixture(`bbc/${key}.rss`)) as { guid: string }[];
     expect(sectionFeed.map((i) => i.guid)).toContain(raw.guid);
+  });
+
+  it.each(unNews.categories.map((c) => c.key))('UN News "%s": the injected story is a real item from that feed', async (key) => {
+    const t = setup();
+    registerSource(t.db, unNews);
+    const { eventId } = await injectDemo(t.db, [unNews], t.channels, 'un-news', key);
+    expect(t.db.prepare('SELECT category_id FROM event_categories WHERE event_id = ?').all(eventId)).toEqual([{ category_id: `un-news:${key}` }]);
+    const raw = JSON.parse((t.db.prepare('SELECT raw FROM events WHERE id = ?').get(eventId) as { raw: string }).raw) as { guid: string };
+    const feed = unNews.parse(fixture(`un-news/${key.replace('/', '-')}.rss`)) as { guid: string }[];
+    expect(feed.map((i) => i.guid)).toContain(raw.guid);
   });
 
   it.each(gdacs.categories.map((c) => c.key))('GDACS "%s": the injected event has the category and event type picked', async (key) => {

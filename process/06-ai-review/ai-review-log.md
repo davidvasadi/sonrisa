@@ -399,7 +399,12 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
   - **Follow-up ([P-031](../07-prompts/session-log.md#p-031-bbc-demo-per-section)):** after the real Slack test showed a World story labelled "Business" (R-031), BBC got the same fix. Its demo data now holds the first real item of each of the seven stored section feeds.
   - **Test:** a per-category test, for every BBC section and every GDACS type, checks that the injected event carries exactly the picked category, and that its item really belongs there (the BBC `guid` is in that section's own stored feed; the GDACS `eventtype` matches).
   - **Mutation check:** making inject use the first stored item again fails 12 of these tests. The two that still pass are the first category of each source, whose first item is already correct.
-  - UN News is still relabelled.
+  - **UN News ([P-032](../07-prompts/session-log.md#p-032-un-news-demo-per-feed)):** the same fix. One real item per stored feed (17), with the same per-feed test. The 14 UN feeds the tests lacked were added as fixtures; five of them were stored gzip-compressed and are decompressed for the fixtures.
+  - **Mutation check:** relabelling fails 15 of the 17 UN tests (27 in total with BBC and GDACS).
+    - Climate change still passes because it is the first feed.
+    - Economic development still passes because the first climate story is genuinely also in the stored economic-development feed; UN News files one story under several topics (M3: 131 of 369 GUIDs).
+    - The test checks real membership, so in real data it can pass for more than one feed. That is accepted.
+  - No demo item is relabelled any more.
 - Related decision: D-017
 
 ## R-027: Real Slack keys briefly in .env.example
