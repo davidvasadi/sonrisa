@@ -77,7 +77,7 @@ These are the real field names, checked against the stored responses ([data-sour
 
 | Field | USGS `significant_day.geojson`, per `features[]` | GDACS `geteventlist/SEARCH` (no params), per `features[]` | BBC RSS `<item>` | UN News RSS `<item>` |
 | --- | --- | --- | --- | --- |
-| externalIds | `id`, plus every entry of `properties.ids` (split `,ci41342111,` on commas, drop empties) | `` `${properties.eventtype}${properties.eventid}` `` (same shape as the RSS `guid`, e.g. `FL1104169`) | `guid` as is (e.g. `https://www.bbc.co.uk/news/articles/c639m98gde00o#0`) | `guid` (permalink) |
+| externalIds | `id`, plus every entry of `properties.ids` (split `,ci41342111,` on commas, drop empties) | `` `${properties.eventtype}${properties.eventid}` `` (same shape as the RSS `guid`, e.g. `FL1104169`) | `guid` **without its `#n` suffix** (e.g. `https://www.bbc.co.uk/news/articles/c639m98gde00o`): the suffix differs for the same article between feeds and within one feed, found in M6 ([R-020](../06-ai-review/ai-review-log.md)) | `guid` (permalink) |
 | categoryKey | `'significant'` (the feed polled) | `properties.eventtype` (`EQ`, `TC`, `FL`, `VO`, `DR`, `WF`) | the feed polled, e.g. `world` | the feed polled, e.g. `topic/health` |
 | title | `properties.title` | `properties.name` | `title` | `title` |
 | occurredAt | `properties.time` (epoch ms → ISO) | `properties.fromdate` (no zone; **assumed UTC, unverified**) | – | – |
@@ -90,7 +90,7 @@ These are the real field names, checked against the stored responses ([data-sour
 Notes from M3 that shape this:
 - **USGS:** use `significant_day`, polled every 2 min. Its stored sample ([significant_day.geojson](../03-research/raw-responses/usgs/significant_day.geojson)) had **no events** that day: `features` is `[]` and the top-level `bbox` key is absent. So the feature fields come from `significant_month`, and code must handle an empty feed without `bbox`. The feed updates every minute, and a one-day window survives restarts. *Unverified:* whether `id` can change between polls. Matching on all of `properties.ids` covers that case.
 - **GDACS:** a new `episodeid` means an update to a known event. It is **not** a new event, and re-notifying on revisions is under Later.
-- **BBC:** the `#0` suffix on `guid` may change on updates (*unverified*). If it does, an update would look new. Accepted as a known risk; see [Event dedup](#event-dedup).
+- **BBC:** M6 showed the `#n` suffix on `guid` is not stable: the same article is `#0` in business and `#2` in world, and once appeared twice in one feed as `#1` and `#3`. The external ID is the article URL without the suffix.
 
 ## Categories: from the sources to the user's list
 
@@ -198,10 +198,12 @@ interface Source {
   pollIntervalMs: number;             // usgs 120_000, gdacs 600_000, bbc 300_000, un-news 900_000
   categories: { key: string; label: string }[];
   feeds: { key: string; url: string }[];                 // usgs: 1, gdacs: 1, bbc: 7, un-news: 17
-  fetchFeed(feed: { key: string; url: string }): Promise<unknown[]>; // network only; throws on failure
+  parse(body: string): unknown[];                        // pure; throws if the body isn't the expected format
   normalise(item: unknown, feedKey: string): NormalisedEvent;      // pure; tested with fixtures (F12)
 }
 ```
+
+As built in M6, the **core** fetches each feed URL (one HTTP helper with a User-Agent and a 20 s timeout) and the module only parses and normalises. This keeps network code out of the modules, and the tests run the exact parsing code on stored responses.
 
 - **Poller:** runs one timer per source and never two polls of the same source at once. A poll fetches every feed of the source, then hands everything to Ingest as one batch (F1).
 - **Freshness per feed (D-014, F13):** every feed fetch updates its `feeds` row: `last_attempt_at`, then `last_success_at` or `last_error`. The admin view shows each feed. A single dead UN feed (e.g. a slug that starts returning 404) is visible even while the other 16 succeed.

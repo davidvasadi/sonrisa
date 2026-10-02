@@ -259,3 +259,26 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
   - **Logged:** D-032 and D-033; Q6 closed.
   - **Corrections found while closing:** a first "fresh clone" check that ran in the wrong folder, and a wrong claim about node-gyp in D-032 (R-016).
 - Follow-up: R-016 to R-019 (approved in P-026), D-032, D-033
+
+## P-026: Close M5, build M6 ingestion
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Keep R-016 to R-019, add the Python/make line to the README, and commit M5. Then build M6 ingestion: the source interface and common event format from the design, one source end to end and then the rest, dedup, the first-poll baseline and freshness per feed, with tests on the real responses. List assumptions first; report real test and app output.
+- Prompt: Verbatim in [transcripts/P-026-m6-ingestion.md](transcripts/P-026-m6-ingestion.md).
+- Result summary:
+  - M5 committed (`d858e99`).
+  - **Built:** the USGS, GDACS, BBC and UN News modules, ingest (poll-batch grouping, per-feed baseline, dedup on any external ID, multi-category linking), and a poller with freshness per feed. Two endpoints: `/api/categories` and `/api/admin/feeds`.
+  - **Tests:** 36 pass, on fixtures copied from the stored responses. Mutation checks: the baseline and BBC-ID mutations were caught. The grouping mutation was first missed by an order-dependent test (R-021); after the fix it is caught.
+  - **Real run:** 26 feeds OK, 703 events stored as baseline; the second BBC poll found 246 known and 0 duplicates.
+  - **Findings:** BBC GUID suffixes are unstable, which corrects the M3 count (R-020). The design is updated: BBC IDs, and the core fetches while modules parse.
+- Follow-up: [R-020](../06-ai-review/ai-review-log.md#r-020-bbc-guid-suffix-is-not-stable), [R-021](../06-ai-review/ai-review-log.md#r-021-order-dependent-multi-feed-test-missed-a-mutation), [R-022](../06-ai-review/ai-review-log.md#r-022-segfault-when-inspecting-the-database-on-node-20)
+
+## P-027: Close M6, start M7
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Run /milestone-done for M6, keep R-020 to R-022 as described, and commit. Then build M7: matching and delivery (subscriptions → channel registry → email outbox or SMTP, Slack webhook and the stub log channel), one delivery per event, user and channel, no retries, demo inject through the whole pipeline, and Slack tests on the mock receiver. Fix the channels path in the design. List assumptions first; report real output.
+- Prompt: Verbatim in [transcripts/P-027-close-m6-start-m7.md](transcripts/P-027-close-m6-start-m7.md).
+- Result summary: M6 closed: 36 tests pass, the app runs with no `.env` (26 feeds, 0 errors), the leak check is OK, R-020 to R-022 are written, and M6 is committed. M7 is in progress.
+- Follow-up: M7

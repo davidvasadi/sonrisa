@@ -1,8 +1,70 @@
 import type { Db } from './db.js';
+import { ingestPoll, registerSource, type FeedResult, type IngestReport } from './ingest.js';
+import type { Source } from './sources/types.js';
 
-// The worker runs inside the API process (design: one Node process, one SQLite writer).
-// M5 skeleton: no sources yet. M6 adds the poller (one timer per source).
-export function startWorker(_db: Db, log: (msg: string) => void = console.log): { stop: () => void } {
-  log('worker: started, 0 sources registered (sources come in M6)');
-  return { stop: () => log('worker: stopped') };
+export type FetchText = (url: string) => Promise<string>;
+
+const USER_AGENT = 'sonrisa/0.1 (local demo alerting app)';
+
+export const fetchText: FetchText = async (url) => {
+  // Node's fetch decompresses gzip itself (UN News sends gzip unasked, see data-sources.md).
+  const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(20_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.text();
+};
+
+// One poll: fetch and parse every feed of the source, then ingest them as one batch (design F1).
+export async function pollSource(db: Db, source: Source, fetch: FetchText = fetchText): Promise<IngestReport> {
+  const results: FeedResult[] = [];
+  for (const feed of source.feeds) {
+    try {
+      results.push({ feedKey: feed.key, ok: true, items: source.parse(await fetch(feed.url)) });
+    } catch (e) {
+      results.push({ feedKey: feed.key, ok: false, error: (e as Error).message });
+    }
+  }
+  return ingestPoll(db, source, results);
+}
+
+export function summary(source: Source, r: IngestReport): string {
+  return (
+    `poll ${source.id}: feeds ${r.feedsOk} ok / ${r.feedsFailed} failed, items ${r.items}, ` +
+    `new ${r.newEventIds.length}, baseline ${r.baselineEventIds.length}, known ${r.knownEvents}` +
+    (r.itemErrors.length ? `, item errors ${r.itemErrors.length}` : '') +
+    (r.unknownCategories.length ? `, new categories ${r.unknownCategories.join(',')}` : '')
+  );
+}
+
+// The worker runs inside the API process (design: one process, one SQLite writer).
+// One timer per source; a source is never polled twice at the same time.
+export function startWorker(
+  db: Db,
+  sources: Source[],
+  { fetch = fetchText, log = console.log }: { fetch?: FetchText; log?: (msg: string) => void } = {},
+): { stop: () => void } {
+  const timers: NodeJS.Timeout[] = [];
+  for (const source of sources) {
+    registerSource(db, source);
+    let running = false;
+    const run = async () => {
+      if (running) return;
+      running = true;
+      try {
+        log(summary(source, await pollSource(db, source, fetch)));
+      } catch (e) {
+        log(`poll ${source.id}: crashed: ${(e as Error).message}`);
+      } finally {
+        running = false;
+      }
+    };
+    void run();
+    timers.push(setInterval(run, source.pollIntervalMs));
+  }
+  log(`worker: started, ${sources.length} source(s): ${sources.map((s) => s.id).join(', ') || 'none'}`);
+  return {
+    stop: () => {
+      timers.forEach(clearInterval);
+      log('worker: stopped');
+    },
+  };
 }

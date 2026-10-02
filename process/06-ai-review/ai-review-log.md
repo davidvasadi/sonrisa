@@ -292,3 +292,47 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: accepted
 - What changed as a result: Nothing in the code. This kind of check is to be repeated for the M6/M7 dedup and matching logic.
 - Related decision: D-005
+
+## R-020: BBC GUID suffix is not stable
+
+- Date: 2026-10-02
+- Prompt / session: [P-026](../07-prompts/session-log.md#p-026-close-m5-build-m6-ingestion)
+- What the AI produced:
+  - In M3, [data-sources.md](../03-research/data-sources.md) said 8 of 278 BBC GUIDs appear in more than one feed, and flagged the `#0` suffix as a possible risk (*unverified*).
+  - The M4 design used the full `guid` as the BBC external ID.
+- How I checked it: While writing the multi-feed test in M6, the AI found that the one GUID shared by two fixtures ended in `#2`, not `#0`. It then compared article URLs with the suffix removed, across all stored BBC feeds.
+- What I found:
+  - The suffix differs for the same article between feeds (`#0` in business, `#2` in world). One article appears twice in one feed, as `#1` and `#3`.
+  - By article URL, **34** BBC articles appear more than once. The M3 count of 8 compared full GUIDs, so it was too low.
+  - Deduplicating on the full GUID would have delivered those stories twice.
+- Verdict: corrected
+- What changed as a result: The BBC external ID is the article URL without `#n`. A test uses the real `#0` vs `#2` case. The design mapping and data-sources item 8 are corrected. A mutation that keeps the suffix makes 4 tests fail.
+- Related decision: D-005, D-028
+
+## R-021: Order-dependent multi-feed test missed a mutation
+
+- Date: 2026-10-02
+- Prompt / session: [P-026](../07-prompts/session-log.md#p-026-close-m5-build-m6-ingestion)
+- What the AI produced: Ingest tests for one story in several feeds, including "a story new in a baselined feed is notified even if a not-yet-baselined feed carries it too".
+- How I checked it: Mutation checks. The AI removed the within-poll grouping (every item became its own group) and ran the suite.
+- What I found:
+  - All 34 tests still passed. Without grouping, the second copy of a story finds the first one in the database inside the same transaction, so the categories still got linked.
+  - Grouping only matters when a story is first seen in a not-yet-baselined feed. The test listed the baselined feed first, so it couldn't tell.
+  - The other two mutations (baseline ignored; BBC suffix kept) were caught, by 5 and 4 failing tests.
+- Verdict: corrected
+- What changed as a result: The test now lists the not-yet-baselined feed first, and the grouping mutation fails it. The lesson: a passing test is only evidence if a broken implementation makes it fail.
+- Related decision: D-027, D-028
+
+## R-022: Segfault when inspecting the database on Node 20
+
+- Date: 2026-10-02
+- Prompt / session: [P-026](../07-prompts/session-log.md#p-026-close-m5-build-m6-ingestion)
+- What the AI produced: An ad-hoc `node -e` script to inspect the real-run database, run in a shell that was still on the global Node 20.
+- How I checked it: Read the exit code instead of the partial output: 139 (segfault).
+- What I found:
+  - `better-sqlite3` 13 (which needs Node 22) was loaded by Node 20. It crashed instead of failing with a clear error.
+  - The app was not affected: `npm` scripts ran on Node 22 via `nvm use`. Re-run on Node 22, the same check worked.
+  - The risk is real for anyone who opens the database with the wrong Node: a crash, not a helpful message.
+- Verdict: corrected (the check was re-run correctly)
+- What changed as a result: Every later database check runs after `nvm use`. Root `engines` already says `>=22.12.0`. *Not done:* a runtime guard that exits with a clear message on Node < 22. That would be cheap; it is for the author to decide.
+- Related decision: D-032
