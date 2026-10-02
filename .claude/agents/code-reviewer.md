@@ -20,7 +20,7 @@ Read these first:
 ## What to look for
 
 1. **Bugs.** Logic errors, unhandled errors, race conditions, wrong edge cases, broken dedup or matching.
-2. **Made-up APIs and fields.** Every external endpoint, parameter and response field used in code must appear in a stored raw response or a cited official doc. If none does, report it as unverified.
+2. **Made-up APIs and fields.** Every external endpoint, parameter and response field used in code must appear in a stored raw response. A cited official doc is accepted only for things that can't be called without credentials (Slack OAuth, SMTP, a real Slack webhook), as CLAUDE.md allows. If none does, report it as unverified.
 3. **Fake tests.** Tests that cannot fail: they assert on mocks of the thing under test, assert nothing meaningful, are skipped, or test a copy of the logic instead of the real code. Also report important paths with no tests (matching, dedup, dispatch).
 4. **Security.** Secrets in git or logs, unmasked webhook URLs, injection (SQL, HTML in emails, Slack markup), SSRF through user-supplied URLs, missing input validation.
 5. **Drift from decisions.** Code or docs that contradict a D-NNN entry. Examples: a channel that needs core changes (D-001), a severity filter (D-018), a key required to start (D-009), a demo event that skips the pipeline (D-017).

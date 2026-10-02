@@ -2,6 +2,8 @@
 
 > **Status: AI first pass, not yet reviewed.** Claude wrote this from the brief alone ([01-brief/brief.md](../01-brief/brief.md)). That was before the author shared any of their own decisions, and before any stack choice or data-source research. The assumptions below are the AI's defaults. The author's decisions go in the [decision log](../05-decisions/decision-log.md), and anything here they reject or change goes in the [AI review log](../06-ai-review/ai-review-log.md).
 
+> **Kept unchanged on purpose, as the AI's baseline. Since reviewed, and partly overridden.** See [R-002](../06-ai-review/ai-review-log.md#r-002-brief-analysis-compared-with-author-decisions) for the comparison. In particular, the importance floor and per-user filters proposed here were replaced: categories come from the sources ([D-013](../05-decisions/decision-log.md#d-013-categories-come-from-the-sources-not-a-fixed-list)) and there is no importance filter ([D-018](../05-decisions/decision-log.md#d-018-no-importance-filter-the-source-decides)). The current scope is in [assumptions](../02-plan/assumptions.md) and the [decision log](../05-decisions/decision-log.md).
+
 ## What the brief says
 
 The PM's brief, taken one clause at a time:

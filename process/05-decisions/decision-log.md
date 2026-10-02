@@ -21,7 +21,17 @@ Every significant decision, in the order it was made. Newest at the bottom.
 
 ## Entries
 
-All entries below were decided by the author in [P-005](../07-prompts/session-log.md#p-005-author-decisions), after the AI's [brief analysis](../03-research/brief-analysis.md). "Why" quotes the author where a reason was given. Where none was given, the AI drafted one, marked *AI-inferred, confirmed*: the author reviewed and confirmed these in [P-006](../07-prompts/session-log.md#p-006-decision-revisions). D-013 onwards come from P-006.
+All entries below were decided by the author, after the AI's [brief analysis](../03-research/brief-analysis.md). Where each one comes from:
+
+| Entries | Prompt |
+| --- | --- |
+| D-001 to D-012 | [P-005](../07-prompts/session-log.md#p-005-author-decisions) |
+| D-013 to D-017 | [P-006](../07-prompts/session-log.md#p-006-decision-revisions) |
+| D-018 | [P-007](../07-prompts/session-log.md#p-007-close-q1) |
+| D-019, D-020 | [P-009](../07-prompts/session-log.md#p-009-priorities-and-review-milestone) |
+| D-021 to D-023 | [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions), D-021 completed in [P-017](../07-prompts/session-log.md#p-017-review-entries-and-slack-button) |
+
+"Why" quotes the author where a reason was given. Where none was given in P-005, the AI drafted one, marked *AI-inferred, confirmed*: the author reviewed and confirmed these in P-006.
 
 ## D-001: Channels are delivery mechanisms, one module per channel
 
@@ -80,7 +90,7 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 - Decision: Events are deduplicated, and notifications are deduplicated separately. A user never receives the same event twice on the same channel.
 - Why: *AI-inferred, confirmed:* duplicate alerts are the fastest way to make users mute the product.
 - AI involvement: Matches the AI's analysis (gap 2, risk 5).
-- Consequences / trade-offs: This needs stable event identity (source + external ID) and a uniqueness constraint per notification. Cross-source dedup (the same quake from two feeds) is harder and depends on the sources chosen.
+- Consequences / trade-offs: This needs stable event identity (source + external ID) and a uniqueness constraint per notification. Cross-source dedup (the same quake from two feeds) is harder and depends on the sources chosen. It is deferred to Later (P-016): dedup is per source only.
 
 ## D-006: Two views, no authentication
 
@@ -98,9 +108,9 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 ## D-007: Slack OAuth if configured, webhook paste otherwise
 
 - Date: 2026-10-02
-- Status: accepted
+- Status: accepted (amended by [D-021](#d-021-connect-slack-button-is-a-must-have))
 - Context: The brief requires Slack. The AI's default was webhook paste only (A9).
-- Decision: Slack is optional. A "Connect Slack" OAuth button appears when a Slack app is configured. Otherwise the user pastes an incoming webhook URL. Webhook URLs are masked everywhere.
+- Decision: Slack is required (the brief names it). A user connects it with a "Connect Slack" OAuth button, which works when a Slack app is configured, or by pasting an incoming webhook URL. Webhook URLs are masked everywhere.
 - Why: *AI-inferred, confirmed:* OAuth is the realistic product flow. Webhook paste keeps the zero-config promise (D-009).
 - AI involvement: Extends the AI's webhook-only default. The AI notes that if OAuth uses the `incoming-webhook` scope, both paths end with a webhook URL, so delivery code can be shared (accepted in P-006). Whether Slack accepts a localhost redirect (Q5) is checked when the Slack integration is built.
 - Consequences / trade-offs: Two connection flows to build and test. Secrets must be masked in the UI, API responses and logs.
@@ -119,7 +129,7 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 
 - Date: 2026-10-02
 - Status: accepted
-- Decision: `npm install && npm run dev` starts everything. No keys and no Docker are required. SMTP and Slack OAuth are optional and switch on when configured.
+- Decision: `npm install && npm run dev` starts everything. No keys and no Docker are required. SMTP and Slack OAuth need credentials and switch on when configured; without them, email goes to the dev outbox and Slack is connected by pasting a webhook.
 - Why: *AI-inferred, confirmed:* a reviewer can run it in one step.
 - AI involvement: Not raised in the AI's analysis.
 - Consequences / trade-offs: Every external dependency needs a fallback (dev outbox, webhook paste, keyless sources). The SQLite driver must install cleanly (Q6, checked at setup). One command has to start the API, worker and web UI.
@@ -235,7 +245,7 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 ## D-020: Priorities follow the task, not effort
 
 - Date: 2026-10-02
-- Status: accepted
+- Status: accepted (amended by [D-021](#d-021-connect-slack-button-is-a-must-have): the Connect Slack button moves from cut-first to must-have)
 - Context: The first plan (P-008) set the cut order by effort and optionality.
 - Decision: Three tiers, set out in the [plan](../02-plan/plan.md#priorities).
   - **Must have:** the process record, plus everything the brief literally asks for (category alerts; Email and Slack delivery, with a webhook being enough; easy-to-add channels with a stub; an admin view), plus deduplication and starting with no keys.
@@ -244,3 +254,39 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 - Why: Author: the evaluation weighs the process most, and the brief's literal asks define "done". Dedup and no-keys are must-haves because without them the app doesn't work or can't be run.
 - AI involvement: Replaces the AI's effort-based cut order from P-008. Slack OAuth (D-007) and markets (D-016) are now explicitly expendable. Live updates (D-004) and source freshness (D-014) remain in scope but can be dropped if time runs out.
 - Consequences / trade-offs: An independent code review (M9) is added before submission. The author decides what gets fixed.
+
+## D-021: Connect Slack button is a must-have
+
+- Date: 2026-10-02
+- Status: accepted (amends [D-007](#d-007-slack-oauth-if-configured-webhook-paste-otherwise) and [D-020](#d-020-priorities-follow-the-task-not-effort))
+- Context: D-007 called Slack "optional", which read as if Slack itself could be skipped, and D-020 put the Slack OAuth button first on the cut list.
+- Options considered:
+  1. Keep OAuth as cut-first; a pasted webhook alone covers "Slack" (D-020).
+  2. Make both connection paths must-haves.
+- Decision: Option 2. Slack is a must-have, and so is the "Connect Slack" button. When no Slack app is configured (as on a reviewer's machine), the button is shown but disabled, with a short note, and the paste-webhook option is next to it, so Slack still works with no keys.
+- Why: Author decision.
+- AI involvement: The AI flagged the wording conflict between D-007 ("Slack is optional") and D-020 (Slack is a must-have) in its P-015 review. The fix is the author's.
+- Consequences / trade-offs: OAuth is no longer expendable, so Q5 (localhost redirect) is checked against Slack's docs during M3. If Slack does not accept a localhost redirect, the README documents the workaround; reviewers still have the webhook option. Because OAuth can't be tried without a Slack app, it is verified from Slack's official docs (CLAUDE.md exception) and the author's real test (D-023). The cut-first list is now push ingestion, UI polish, markets. The disabled-button behaviour was confirmed by the author in P-017.
+
+## D-022: Pasted webhooks only to hooks.slack.com
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: With webhook paste, the server POSTs to whatever URL a user enters. That lets any user make the server call internal or arbitrary hosts (SSRF). The AI flagged this as an undecided gap in P-015.
+- Options considered:
+  1. Accept any URL.
+  2. Accept only Slack incoming-webhook URLs.
+- Decision: Option 2. A pasted webhook URL is accepted only if it is `https` and its host is exactly `hooks.slack.com`. Anything else is rejected with a clear error, both when saved and again before sending.
+- Why: Author decision. Closes the SSRF hole without adding anything a real Slack user would miss.
+- AI involvement: Raised by the AI as a gap; the rule is the author's.
+- Consequences / trade-offs: Other webhook-style destinations (e.g. Teams, generic webhooks) would be separate channel modules with their own rules (D-001). The exact URL shape is to be confirmed from Slack's docs before it is coded (CLAUDE.md). Needs tests: allowed host, other hosts, look-alike hosts (e.g. `hooks.slack.com.evil.test`), `http`.
+
+## D-023: Slack delivery tested with a mock receiver, then once for real
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: M7 requires delivery to "a Slack webhook" exactly once, but a real webhook needs a Slack workspace, which the no-keys rule (D-009) can't assume. The AI flagged that "Slack works" could otherwise be claimed without a real send.
+- Decision: Automated tests send to a local mock receiver. The author creates a free Slack workspace at M7/M8, tests both connection paths for real once, and saves a screenshot.
+- Why: Author decision. Tests stay key-free and repeatable; one real send proves the integration.
+- AI involvement: Gap raised by the AI in P-015; the approach is the author's.
+- Consequences / trade-offs: The mock only proves we send what we think Slack expects; the real test and screenshot are the proof that Slack accepts it. Until that test is done, docs must call Slack delivery "tested against a mock only". Note: with D-022, tests must allow the mock's host only in test configuration, never in normal runs.

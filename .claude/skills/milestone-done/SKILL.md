@@ -56,6 +56,7 @@ Show the drafts and ask which to keep, edit or drop. Write only the approved one
 
 ## 8. Propose the commit
 
+- Re-export and re-check right before committing: run `node process/scripts/export-transcripts.mjs`, then `--check`. Work done since step 4 leaves the step 4 export stale, and the check then fails with "turn(s) missing" (R-009). If the check fails for any other reason, stop and show it.
 - Run a secrets check on what will be committed. Look for `.env` files, tokens, `hooks.slack.com/services/` URLs, passwords and API keys. Report the result.
 - Show `git status` and propose a commit message: a meaningful subject that names the milestone, a short body, and the attribution line.
 - Ask: **"Commit with this message? (y/n)"**. Commit only on "y". On anything else, don't commit.

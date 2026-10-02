@@ -17,7 +17,7 @@ Two kinds of entry:
 - **Decided ([D-018](../05-decisions/decision-log.md#d-018-no-importance-filter-the-source-decides)):** There is no system-level importance floor and no severity filter. Everything a source publishes in a category the user picked is delivered. "Important" means "the source chose to publish it". If a source publishes too much, research picks a different source instead of filtering.
 - **Working assumption:** We consume sources that already emit discrete, structured events. We do not build event detection from raw signals (e.g. clustering news articles).
 - **Decided ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Every source is normalised into one common event format (source, category, title, time, location, severity, link, external ID). Deduplication and matching depend on it, so it is core scope.
-- **Decided ([D-005](../05-decisions/decision-log.md#d-005-deduplicate-events-and-notifications)):** Events are deduplicated, and notifications are deduplicated separately.
+- **Decided ([D-005](../05-decisions/decision-log.md#d-005-deduplicate-events-and-notifications)):** Events are deduplicated, and notifications are deduplicated separately. Dedup is per source; cross-source dedup is under Later.
 
 ## Data sources
 
@@ -33,7 +33,9 @@ Two kinds of entry:
 
 - **Decided ([D-001](../05-decisions/decision-log.md#d-001-channels-are-delivery-mechanisms-one-module-per-channel)):** A channel is a delivery mechanism (Email, Slack), not a category. Adding a channel such as SMS or Teams means adding one module, with no change to the core.
 - **Decided ([D-013](../05-decisions/decision-log.md#d-013-categories-come-from-the-sources-not-a-fixed-list)):** For each category a user subscribes to, they pick which channels deliver it.
-- **Decided ([D-007](../05-decisions/decision-log.md#d-007-slack-oauth-if-configured-webhook-paste-otherwise), [D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Slack is optional. The user connects it through OAuth when a Slack app is configured, and pastes a webhook URL otherwise. Either way a webhook URL is stored, and both paths share one delivery path. Webhook URLs are always masked.
+- **Decided ([D-007](../05-decisions/decision-log.md#d-007-slack-oauth-if-configured-webhook-paste-otherwise), [D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Slack is a must-have, and so is the "Connect Slack" button ([D-021](../05-decisions/decision-log.md#d-021-connect-slack-button-is-a-must-have)). The button works when a Slack app is configured. When none is configured, it is shown but disabled, with a short note, and the paste-webhook option is next to it. Either way a webhook URL is stored, and both paths share one delivery path. Webhook URLs are always masked.
+- **Decided ([D-022](../05-decisions/decision-log.md#d-022-pasted-webhooks-only-to-hooksslackcom)):** A pasted webhook is accepted only if it is `https` on host `hooks.slack.com`.
+- **Decided ([D-023](../05-decisions/decision-log.md#d-023-slack-delivery-tested-with-a-mock-receiver-then-once-for-real)):** Slack delivery tests use a local mock receiver. The author tests both Slack paths once in a real free workspace and saves a screenshot.
 - **Decided ([D-010](../05-decisions/decision-log.md#d-010-email-via-smtp-if-configured-dev-outbox-otherwise)):** Email goes out over SMTP when SMTP is configured. Otherwise it goes to a dev outbox, which is visible in the admin view.
 - **Decided ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Each channel module owns the formatting of its own messages (HTML or text email, Slack blocks). This is core scope.
 
@@ -46,7 +48,7 @@ Two kinds of entry:
 
 ## Non-functional
 
-- **Decided ([D-009](../05-decisions/decision-log.md#d-009-zero-config-local-run)):** The app runs with `npm install && npm run dev`, with no keys and no Docker. SMTP and Slack OAuth are optional extras that switch on when configured.
+- **Decided ([D-009](../05-decisions/decision-log.md#d-009-zero-config-local-run)):** The app runs with `npm install && npm run dev`, with no keys and no Docker. SMTP and Slack OAuth need credentials and switch on when configured. Without them, email goes to the dev outbox and Slack is connected by pasting a webhook.
 - **Decided ([D-004](../05-decisions/decision-log.md#d-004-live-ui-without-refresh)):** The UI updates live, without a page refresh.
 - **Decided ([D-011](../05-decisions/decision-log.md#d-011-stack-react--vite--shadcn-node--typescript-sqlite)):** The stack is React + Vite + shadcn, Node + TypeScript, and SQLite. Not Next.js.
 
@@ -58,7 +60,7 @@ Two kinds of entry:
 | Q2 | Is there a free, keyless, legitimately usable source of market data? | **Rule set** ([D-016](../05-decisions/decision-log.md#d-016-drop-markets-if-they-need-a-key-or-registration)): if it needs a key or registration, markets are dropped. Research still has to check |
 | Q3 | How does the user view know which user it is, without auth? | **Resolved** ([D-015](../05-decisions/decision-log.md#d-015-simple-user-picker)): simple user picker |
 | Q4 | Does any chosen free source actually offer push? | **Rule set** ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)): push only where verified. Research checks each source |
-| Q5 | Does Slack OAuth accept a `http://localhost` redirect URL? | **Deferred** to the Slack integration. To verify against Slack's docs, not from memory |
+| Q5 | Does Slack OAuth accept a `http://localhost` redirect URL? | **Checked in M3** against Slack's docs, not from memory (D-021). If localhost is not accepted, the README documents the workaround; reviewers still have the webhook option |
 | Q6 | Which SQLite driver works with `npm install` alone? | **Deferred** to project setup. Native modules (e.g. `better-sqlite3`) can fail to build; Node's built-in `node:sqlite` depends on the Node version |
 
 ## Later (out of scope for the 24-hour build)
@@ -66,6 +68,7 @@ Two kinds of entry:
 Raised in the [brief analysis](../03-research/brief-analysis.md) and deferred by the author ([D-012](../05-decisions/decision-log.md#d-012-defer-remaining-extras-to-later)):
 
 - Per-user filters within a category (region, keyword). A severity filter is excluded by D-018, not deferred
+- Cross-source dedup (the same event reported by two sources). Dedup is per source only (D-005). Deferred by the author in P-016
 - Re-notifying when an event is revised (e.g. an earthquake's magnitude is updated)
 - Per-user rate limits and cooldowns
 - Hysteresis for market alerts that oscillate around a threshold (only relevant if markets survive D-016)
@@ -77,4 +80,3 @@ Raised in the [brief analysis](../03-research/brief-analysis.md) and deferred by
 - Digests instead of immediate notifications
 - A test harness that replays recorded raw API responses through the pipeline
 - Authentication and roles
-- A notice that disaster alerts are informational, not an emergency warning service

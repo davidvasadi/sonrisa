@@ -24,3 +24,5 @@ Also: [notes](process/notes/) and [scripts](process/scripts/). Rules given to th
 The implementation. Empty for now; setup and run instructions will go here once it exists.
 
 > **Local demo only.** There is no authentication: the user view uses a simple user picker, and the admin view is open to anyone who can reach the app, including all users' data and failed deliveries. Do not expose it on a network. See [D-006](process/05-decisions/decision-log.md#d-006-two-views-no-authentication).
+
+> **Not an emergency warning service.** Disaster and other alerts are informational only. They depend on free third-party sources and can be late, incomplete or missing. For warnings that affect your safety, follow your official local authorities.

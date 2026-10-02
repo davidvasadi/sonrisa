@@ -133,3 +133,39 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-013-skill-flag-and-redaction.md](transcripts/P-013-skill-flag-and-redaction.md).
 - Result summary: `disable-model-invocation` removed from the skill. The export redacts email addresses and `--check` fails on any address. The leak check's false positives were fixed and it was re-tested with planted leaks.
 - Follow-up: [R-005](../06-ai-review/ai-review-log.md#r-005-skill-flag-contradicted-the-yn-rule), [R-006](../06-ai-review/ai-review-log.md#r-006-leak-check-false-positives-after-the-session-grew)
+
+## P-014: Answer to the /milestone-done question
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Decline running /milestone-done after P-013.
+- Prompt: Verbatim in [transcripts/P-014-milestone-answer.md](transcripts/P-014-milestone-answer.md).
+- Result summary: Skill not run. The AI noted the code-reviewer agent now loads, and that M3 is next.
+- Follow-up: none
+
+## P-015: Review rules and decisions for contradictions
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: In a fresh session, have the AI read CLAUDE.md and the process docs, summarise them, and find anything contradictory or wrong.
+- Prompt: Verbatim in [transcripts/P-015-process-review.md](transcripts/P-015-process-review.md).
+- Result summary: 7 issues (wrong decision-log intro, a raw-response rule that can't apply to credential-gated APIs, "Slack is optional" vs Slack as a must-have, no defined way to test Slack in M7, over-frequent /milestone-done prompt, plan scope including superseded D-002, brief analysis reading as current) and 3 undecided gaps (cross-source dedup, SSRF via pasted webhooks, disaster disclaimer).
+- Follow-up: [R-007](../06-ai-review/ai-review-log.md#r-007-fresh-session-review-of-the-process-docs), fixed in P-016
+
+## P-016: Doc fixes and Slack decisions
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Decide and fix every issue from P-015, then close M2 with /milestone-done.
+- Prompt: Verbatim in [transcripts/P-016-doc-fixes-and-slack-decisions.md](transcripts/P-016-doc-fixes-and-slack-decisions.md).
+- Result summary: CLAUDE.md allows a cited official doc for credential-gated APIs, and asks about /milestone-done only after a milestone. D-021 (Connect Slack button is a must-have, so it leaves the cut-first list), D-022 (pasted webhooks only to `hooks.slack.com`) and D-023 (mock receiver in tests, one real Slack test with a screenshot) were logged. Cross-source dedup moved to Later. A disaster disclaimer was added to the README. Wording fixed in the plan, assumptions, decision log, brief-analysis note and code-reviewer agent.
+- Follow-up: D-021 to D-023, [R-007](../06-ai-review/ai-review-log.md#r-007-fresh-session-review-of-the-process-docs)
+
+## P-017: Review entries and Slack button
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Approve the M2 review entries, confirm the disabled Connect Slack button, schedule Q5, and commit.
+- Prompt: Verbatim in [transcripts/P-017-review-entries-and-slack-button.md](transcripts/P-017-review-entries-and-slack-button.md).
+- Result summary: R-007 to R-009 written. /milestone-done step 8 now re-exports and re-checks before committing. D-021 records the disabled button with a short note, next to the paste-webhook option. Q5 is to be checked in M3, with a README workaround if localhost fails. M2 follow-up committed.
+- Follow-up: [R-009](../06-ai-review/ai-review-log.md#r-009-transcript-export-was-stale-at-commit-time), Q5 in M3

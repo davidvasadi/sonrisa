@@ -97,3 +97,47 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: corrected
 - What changed as a result: A fragment only counts as a leak if it is not in allowed text. Allowed text is built from the raw prompt and reply blocks, not from the extractor's output, so an extractor bug can't whitelist its own leak. Tags are counted beyond those the replies themselves contain. Re-tested against six planted cases: clean, thinking text, a harness tag in a prompt, a real tool result, an email address, a deleted reply. Each behaved as expected. The planted tool result also contained the author's email, which the new email check caught.
 - Related decision: none
+
+## R-007: Fresh-session review of the process docs
+
+- Date: 2026-10-02
+- Prompt / session: [P-015](../07-prompts/session-log.md#p-015-review-rules-and-decisions-for-contradictions), acted on in [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions)
+- What the AI produced: In a new session with no memory of writing the docs, a summary of CLAUDE.md and the process docs, with 7 contradictions or errors and 3 undecided gaps.
+- How I checked it: Read each finding against the files it cited, and decided each one myself.
+- What I found: All 10 held up:
+  1. The decision-log intro named the wrong prompts for D-018 to D-020.
+  2. CLAUDE.md required a raw response even for APIs that can't be called without credentials, while the reviewer agent accepted docs.
+  3. "Slack is optional" (D-007) contradicted Slack as a must-have (D-020).
+  4. There was no defined way to test Slack in M7.
+  5. The /milestone-done question was asked after every task, not every milestone.
+  6. The plan's scope included the superseded D-002.
+  7. The brief analysis read as current.
+
+  Gaps: cross-source dedup, SSRF through pasted webhooks, and the disaster disclaimer.
+
+  For items 3 and 4 I went further than the AI suggested: the Connect Slack button became a must-have, not just a wording fix, and Slack is tested with a mock plus one real send.
+- Verdict: accepted
+- What changed as a result: Wording fixed across CLAUDE.md, the plan, the assumptions, the decision log, the brief analysis and the reviewer agent. D-021 to D-023 were added. Cross-source dedup went to Later, and the disclaimer went into the README.
+- Related decision: D-021, D-022, D-023
+
+## R-008: Prompt numbering taken from memory
+
+- Date: 2026-10-02
+- Prompt / session: [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions)
+- What the AI produced: Decision-log and assumption references to P-014 and P-015 for the new prompts, numbered from the last entry in the session log.
+- How I checked it: /milestone-done step 5 takes prompts from the exported session, not from memory. The export showed a bare "n" at the end of the previous session that had never been logged.
+- What I found: The numbers were off by one. The unlogged "n" is P-014, so the new prompts are P-015 and P-016.
+- Verdict: corrected
+- What changed as a result: References renumbered, and P-014 logged. This confirms the skill's rule of taking prompts from the export.
+- Related decision: none
+
+## R-009: Transcript export was stale at commit time
+
+- Date: 2026-10-02
+- Prompt / session: [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions), fixed in [P-017](../07-prompts/session-log.md#p-017-review-entries-and-slack-button)
+- What the AI produced: The /milestone-done skill, which exports transcripts in step 4 and commits in step 8.
+- How I checked it: Re-ran `--check` before the commit.
+- What I found: It failed with "1 turn(s) missing from export". This was not a content leak: the AI's reply text written after step 4 wasn't in the export yet. A re-export passed (`OK: no leaks found`). Without a re-run, a stale export would have been committed.
+- Verdict: corrected
+- What changed as a result: Step 8 of the skill now re-exports and re-checks right before committing.
+- Related decision: none

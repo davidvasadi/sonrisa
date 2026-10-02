@@ -9,6 +9,7 @@ The main task is [process/01-brief/brief.md](process/01-brief/brief.md). Everyth
 ## Verification
 
 - **Never invent APIs or fields.** Call the API first and save the raw response to [process/03-research/raw-responses/](process/03-research/raw-responses/). Only then write code or docs against it.
+- **Exception: things that can't be called without credentials** (Slack OAuth, SMTP, a real Slack webhook). For these, a cited official doc is enough: link the exact page and quote the relevant part.
 - **Say "unverified"** whenever you are not sure. List your assumptions up front, before the answer.
 - **Don't say it works unless you ran it.** Report what you ran and what came out. If something was not run or tested, say so.
 
@@ -18,7 +19,7 @@ The main task is [process/01-brief/brief.md](process/01-brief/brief.md). Everyth
 
 ## Running and secrets
 
-- **The app must start with no keys:** `npm install && npm run dev`, with no Docker. Anything that needs credentials (SMTP, Slack OAuth) is optional and has a fallback.
+- **The app must start with no keys:** `npm install && npm run dev`, with no Docker. Anything that needs credentials (SMTP, Slack OAuth) has a fallback that works without them (dev outbox, pasted webhook).
 - **No secrets in git.** No keys, tokens, webhook URLs or `.env` files in commits. Mask webhook URLs in the UI, API responses and logs.
 
 ## Code
@@ -34,6 +35,6 @@ These are the conventions used so far:
 - Decisions go in the decision log.
 - AI output that was checked, corrected or rejected goes in [process/06-ai-review/ai-review-log.md](process/06-ai-review/ai-review-log.md).
 
-## After a task
+## After a milestone
 
-Ask: **"Run /milestone-done now? (y/n)"**. Do not run it without a "y".
+Only after a task that completes a milestone in [process/02-plan/plan.md](process/02-plan/plan.md), ask: **"Run /milestone-done now? (y/n)"**. Do not run it without a "y".
