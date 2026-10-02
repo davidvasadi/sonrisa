@@ -26,7 +26,8 @@ export function render(e: DeliveryEvent, to: string, from: string): Mail {
 // SMTP via nodemailer when SMTP_HOST is set, otherwise the dev outbox (D-010).
 // Options from https://nodemailer.com/smtp (stored in raw-responses/nodemailer-docs/smtp.html):
 // host, port (default 587, or 465 if secure), secure (TLS from the start), auth { user, pass }.
-// A real SMTP send has not been tested (no credentials); see the M7 report.
+// Real SMTP: tested by the author with Gmail (app password); the email arrived (author-reported, R-037).
+// The automated tests use a fake transport.
 function smtpTransport(env: NodeJS.ProcessEnv): MailTransport | null {
   if (!env.SMTP_HOST) return null;
   const port = Number(env.SMTP_PORT) || 587;

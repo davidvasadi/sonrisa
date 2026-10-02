@@ -396,3 +396,15 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
   - **Fresh clone:** every README command worked, and the walkthrough passed in Chrome. The only failures were in the test script itself.
   - **M10:** closed.
 - Follow-up: [R-036](../06-ai-review/ai-review-log.md#r-036-fresh-clone-run-of-the-final-readme)
+
+## P-037: Final tests, README screenshots, push to GitHub
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Record the author's real SMTP test (author-reported) and the real polled Slack delivery. Put the final screenshots at the top of the README as a story, link the author's notes, export and commit, check the whole git history for secrets, then publish to a public GitHub repo.
+- Prompt: Verbatim in [transcripts/P-037-final-tests-readme-push.md](transcripts/P-037-final-tests-readme-push.md).
+- Result summary:
+  - **README:** three captioned screenshots at the top (Slack, then user view, then admin view). SMTP moved from "Unverified" to "tested by hand (author-reported)". Notes linked.
+  - **Admin screenshot:** taken from a copy of the author's database with the poller off, so nothing was sent.
+  - **History:** secrets check over every commit, then the push. Results are in the session reply.
+- Follow-up: [R-037](../06-ai-review/ai-review-log.md#r-037-real-smtp-and-a-real-polled-event-tested-by-the-author)

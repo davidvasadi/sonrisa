@@ -251,7 +251,7 @@ There are no changes to the core tables, matching, dispatch, the API or the UI. 
 
 ### Email
 - **Destination (F4):** `fields: [{ name: 'address', label: 'Email address', secret: false }]`. Seed data gives every demo user an `email` destination, so email isn't a special case in the core. Users can change it like any destination.
-- **With SMTP:** when `SMTP_HOST` (plus port, user, password and from) is set, `send` uses SMTP. Which library to use is decided at M7, from its docs (*unverified*).
+- **With SMTP:** when `SMTP_HOST` (plus port, user, password and from) is set, `send` uses SMTP. Which library to use is decided at M7, from its docs (*unverified*). Nodemailer was chosen; a real send through Gmail was tested by the author after M10 (author-reported, R-037).
 - **Without SMTP:** `send` writes the rendered message to `outbox`, and the admin view shows it (D-010).
 - **One renderer:** both paths share the same rendering, so the outbox shows exactly what SMTP would send.
 

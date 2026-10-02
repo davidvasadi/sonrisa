@@ -592,3 +592,19 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: accepted
 - What changed as a result: README final. M10 marked done.
 - Related decision: D-009, D-034
+
+## R-037: Real SMTP and a real polled event, tested by the author
+
+- Date: 2026-10-02
+- Prompt / session: [P-037](../07-prompts/session-log.md#p-037-final-tests-readme-screenshots-push-to-github)
+- What the AI produced: The app as committed in M10. Real SMTP and a real polled event delivered end to end were both listed as unverified or not shown.
+- How I checked it:
+  - **SMTP (author-reported):** the author set Gmail SMTP with an app password in `.env`, and an email from the app arrived in their inbox. They then removed the credentials from `.env`. No inbox screenshot is shared, so the AI did not see the result: this is recorded as the author's report.
+  - **Real polled event:** the author left the app running with Ada subscribed to BBC Business → Slack, and took two screenshots:
+    - [m10-slack-real-poll-event.png](../08-screenshots/m10-slack-real-poll-event.png): the Slack message "Watch: Why has UK diesel price hit an all time high?", BBC News · Business, at 7:00 PM, with no `[DEMO]` prefix;
+    - [m10-user-real-poll-delivered.png](../08-screenshots/m10-user-real-poll-delivered.png): the user view, with the same story and no Demo badge, "sent to you: slack (sent)".
+  - **Admin view:** the AI captured [m10-admin-view.png](../08-screenshots/m10-admin-view.png) from a **copy** of the author's database. The app had already been stopped. The copy was served by the API alone, with no poller, so nothing was fetched or sent. It shows the diesel delivery `sent` (not demo), the demo before it, the webhook masked and every feed fresh. The AI looked at all three images.
+- What I found: Both paths work for real: SMTP by the author's report, and real-source → real-Slack delivery shown in the screenshots.
+- Verdict: accepted
+- What changed as a result: README: SMTP is no longer under "Unverified"; it is listed as tested by hand (author-reported). The real polled delivery is listed too, and the three M10 screenshots are now at the top of the README. The `email.ts` comment and the design doc say the same. The automated tests still use a fake transport.
+- Related decision: D-010, D-023

@@ -2,11 +2,17 @@
 
 Alerts for important world events, by email, Slack and a stub "log" channel. Users pick categories (earthquakes, cyclones, BBC sections, UN topics…) and the channels that should deliver each one. New events from four free public sources are delivered once per user and channel. An admin view shows users, events, every delivery including failures, source freshness and the email outbox, and can inject a demo event.
 
-This is a response to a take-home task: turn a vague brief into a working system using AI agents. The task says the **process is evaluated, not the solution**, so most of this repository is [process/](#process-how-it-was-built): the plan, the decisions, what the AI got wrong and every prompt.
+<table>
+<tr>
+<td width="50%" valign="top"><a href="process/08-screenshots/m10-slack-real-poll-event.png"><img src="process/08-screenshots/m10-slack-real-poll-event.png" alt="Slack message for a live BBC event" width="100%"></a><br><b>1.</b> A live BBC story, picked up by polling (not a demo), was posted to Slack automatically.</td>
+<td width="50%" valign="top"><a href="process/08-screenshots/m10-user-real-poll-delivered.png"><img src="process/08-screenshots/m10-user-real-poll-delivered.png" alt="User view showing the event was sent" width="100%"></a><br><b>2.</b> The user view shows that story as "sent to you: slack (sent)".</td>
+</tr>
+<tr>
+<td colspan="2" align="center"><a href="process/08-screenshots/m10-admin-view.png"><img src="process/08-screenshots/m10-admin-view.png" alt="Final admin view" width="70%"></a><br><b>3.</b> The final admin view: the delivery is recorded as sent, the webhook is masked and every feed is fresh. Click any image for full size.</td>
+</tr>
+</table>
 
-| User view | Admin view | Real Slack delivery |
-| --- | --- | --- |
-| [![User view](process/08-screenshots/m8-user-live.png)](process/08-screenshots/m8-user-live.png) | [![Admin view](process/08-screenshots/m8-admin-view.png)](process/08-screenshots/m8-admin-view.png) | [![Slack message](process/08-screenshots/m8-slack-real-message.png)](process/08-screenshots/m8-slack-real-message.png) |
+This is a response to a take-home task: turn a vague brief into a working system using AI agents. The task says the **process is evaluated, not the solution**, so most of this repository is [process/](#process-how-it-was-built): the plan, the decisions, what the AI got wrong and every prompt.
 
 > **Local demo only.** There is no login. Anyone who can reach the app can see every user's data in the admin view. Do not expose it on a network ([D-006](process/05-decisions/decision-log.md#d-006-two-views-no-authentication)).
 >
@@ -90,6 +96,8 @@ Start with these:
 - [AI review log](process/06-ai-review/ai-review-log.md): what the AI produced, how it was checked, and what was corrected or rejected. Two independent code reviews are in R-033 and R-035
 - [Prompts](process/07-prompts/session-log.md): every prompt, with [verbatim transcripts](process/07-prompts/transcripts/) and full exported sessions
 
+- [My notes](process/notes/notes.md) (in Hungarian): raw notes on what I left out on purpose, next steps, changes of direction and what I caught the AI doing
+
 Also: [research](process/03-research/) (source checks with raw API responses), [design](process/04-design/design.md), [screenshots](process/08-screenshots/), and the rules given to the AI, [CLAUDE.md](CLAUDE.md).
 
 ## Known limitations
@@ -98,9 +106,11 @@ Also: [research](process/03-research/) (source checks with raw API responses), [
 - **One app, no login.** The next step would be to split it into two apps, a user app and an admin app, with the admin app behind a login.
 - **Unverified:**
   - **Cancelling on Slack's approval page.** The callback treats any return without a code as "not connected". Slack's exact parameters for this case are undocumented and were not tried for real.
-  - **Real SMTP.** It is built from nodemailer's docs and tested with a fake transport only; it has never sent through a real mail server. The dev outbox is the tested path.
   - **`&` in Slack links.** `&`, `<` and `>` in link URLs are escaped as Slack's formatting doc requires, but no link containing `&` was sent to a real workspace.
   - **Pasted webhooks against real Slack.** The real Slack test used the Connect button. The paste path shares its delivery code but was tested only with a local mock receiver ([D-023](process/05-decisions/decision-log.md#d-023-slack-delivery-tested-with-a-mock-receiver-then-once-for-real)).
+- **Tested by hand, not by the test suite:**
+  - **Real SMTP.** The author sent through Gmail (with an app password), and the email arrived. This is author-reported: no inbox screenshot is shared, and the credentials were removed afterwards ([R-037](process/06-ai-review/ai-review-log.md#r-037-real-smtp-and-a-real-polled-event-tested-by-the-author)). Automated tests use a fake transport.
+  - **A real polled event, end to end.** A live BBC story came in from polling and was delivered to Slack with no manual step (screenshots 1–3 above; [R-037](process/06-ai-review/ai-review-log.md#r-037-real-smtp-and-a-real-polled-event-tested-by-the-author)).
 - **No price alerts.** "Market movements" come from the BBC Business section, not from price feeds ([D-024](process/05-decisions/decision-log.md#d-024-market-movements-via-bbc-business-no-price-feeds)).
 - **No GovSlack.** Only `hooks.slack.com` is accepted ([D-026](process/05-decisions/decision-log.md#d-026-govslack-not-supported)).
 - **Per-source dedup only.** The same quake reported by USGS and GDACS is two events. More is deferred in the [Later list](process/02-plan/assumptions.md#later-out-of-scope-for-the-24-hour-build): filters within a category, re-notifying revised events, rate limits and retries.
