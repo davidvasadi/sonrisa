@@ -1,0 +1,20 @@
+{
+  "name": "sonrisa",
+  "private": true,
+  "description": "Alerts for important world events, by email, Slack and more. Take-home task.",
+  "workspaces": [
+    "app/server",
+    "app/web"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "concurrently --names server,web --prefix-colors blue,green --kill-others-on-fail \"npm run dev -w app/server\" \"npm run dev -w app/web\"",
+    "test": "npm test -w app/server",
+    "typecheck": "npm run typecheck -w app/server && npm run typecheck -w app/web"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.5"
+  }
+}

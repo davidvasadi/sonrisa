@@ -32,6 +32,7 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 | D-021 to D-023 | [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions), D-021 completed in [P-017](../07-prompts/session-log.md#p-017-review-entries-and-slack-button) |
 | D-024 to D-026 | [P-019](../07-prompts/session-log.md#p-019-m3-source-decisions) |
 | D-027 to D-031 | [P-021](../07-prompts/session-log.md#p-021-design-decisions-and-independent-review) |
+| D-032, D-033 | [P-025](../07-prompts/session-log.md#p-025-node-22-and-template) |
 
 "Why" quotes the author where a reason was given. Where none was given in P-005, the AI drafted one, marked *AI-inferred, confirmed*: the author reviewed and confirmed these in P-006.
 
@@ -392,4 +393,34 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 - Why: Author decision.
 - AI involvement: Proposed by the AI.
 - Consequences / trade-offs: More sections means one line each in the BBC module, plus a stored sample.
+
+## D-032: Node 22 LTS
+
+- Date: 2026-10-02
+- Status: accepted (resolves Q6)
+- Context: At M5 the app was built on Node 20.19.5. Node 20 has no built-in `node:sqlite` (`ERR_UNKNOWN_BUILTIN_MODULE`). `better-sqlite3` 12.11.1, the last version allowing Node 20, publishes prebuilt binaries only for Node ABIs 127, 137, 141 and 147, not for Node 20's ABI 115. So `npm install` compiled it from source with node-gyp. That worked only because this Mac has Xcode Command Line Tools and Python, and would fail on a reviewer's machine without build tools, breaking D-009. Three of the newest packages also require Node 22: `better-sqlite3` 13, `vitest` 5 and `concurrently` 10.
+- Options considered:
+  1. Require Node 22 LTS.
+  2. Stay on Node 20.19 and document the build tools.
+  3. Use `sql.js` (WASM), with no native build, but the app has to persist the in-memory database itself.
+- Decision: Option 1. Node 22.12+ is required. `.nvmrc` says `22`. Root `engines` is `>=22.12.0`, the floor for vitest 5 and Vite 8. The README says Node 22+. The author's global nvm default stays on Node 20, because other projects use it.
+- Why: Author decision, following the AI's recommendation.
+- AI involvement: The AI found the native build, checked the release assets per ABI, and offered the three options.
+- Consequences / trade-offs:
+  - The Node-20 pins were lifted: `better-sqlite3` 13.0.3, `vitest` 5.0.3, `concurrently` 10.0.5, `@types/node` 22.20.5.
+  - `better-sqlite3` 13 bundles prebuilt binaries for 8 platforms inside its npm package, so nothing is compiled. It still has an install step: npm runs `node-gyp rebuild` automatically because the package contains a `binding.gyp`. That `binding.gyp` is deliberately a no-op when a prebuilt exists (`prebuild_exists`): in a clean copy it finished in under a second and wrote only stamp files. But node-gyp itself needs Python and `make`. *Unverified:* whether `npm install` fails on a machine without them. This corrects the first version of this entry, which said there was no install script ([R-016](../06-ai-review/ai-review-log.md#r-016-better-sqlite3-13-still-runs-node-gyp)).
+  - Reviewers on Node 20 must switch versions.
+
+## D-033: Admin layout from satnaing/shadcn-admin, copied in part
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: At M5 the AI checked three MIT React + Vite shadcn admin templates on GitHub: stars, last commit on the default branch, and dependencies.
+- Decision: Use [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) at commit `e16c87f` (15.5k stars, last commit on `main` 2026-06-11), but copy only the layout and the UI components the app uses. Clerk and login are removed. TanStack Router, cookies and the context providers are replaced by a small own layout and a two-view hash switch.
+- Why: Author decision. Keep it small.
+- AI involvement: The AI compared the three templates and noted that this one carries Clerk and 70 dependencies. The pick is the author's.
+- Consequences / trade-offs:
+  - **Copied:** 9 `ui/` components, `header` and `main`, the mobile hook, the theme CSS and `cn`. Each copied file has a provenance line, and the MIT licence is in `app/web/THIRD-PARTY-NOTICES.md`.
+  - **Added:** 12 runtime and build dependencies (Radix primitives, Tailwind 4, lucide, cva, clsx, tailwind-merge), all MIT, Apache-2.0 or ISC.
+  - **Future updates:** any later upgrade of the template is manual.
 

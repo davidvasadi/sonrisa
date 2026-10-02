@@ -52,6 +52,7 @@ Two kinds of entry:
 - **Decided ([D-009](../05-decisions/decision-log.md#d-009-zero-config-local-run)):** The app runs with `npm install && npm run dev`, with no keys and no Docker. SMTP and Slack OAuth need credentials and switch on when configured. Without them, email goes to the dev outbox and Slack is connected by pasting a webhook.
 - **Decided ([D-004](../05-decisions/decision-log.md#d-004-live-ui-without-refresh)):** The UI updates live, without a page refresh.
 - **Decided ([D-011](../05-decisions/decision-log.md#d-011-stack-react--vite--shadcn-node--typescript-sqlite)):** The stack is React + Vite + shadcn, Node + TypeScript, and SQLite. Not Next.js.
+- **Decided ([D-032](../05-decisions/decision-log.md#d-032-node-22-lts), [D-033](../05-decisions/decision-log.md#d-033-admin-layout-from-satnaingshadcn-admin-copied-in-part)):** Node 22.12+. The admin layout and UI components are copied in part from satnaing/shadcn-admin (MIT).
 
 ## Open questions
 
@@ -62,7 +63,7 @@ Two kinds of entry:
 | Q3 | How does the user view know which user it is, without auth? | **Resolved** ([D-015](../05-decisions/decision-log.md#d-015-simple-user-picker)): simple user picker |
 | Q4 | Does any chosen free source actually offer push? | **Answered in M3** ([data sources](../03-research/data-sources.md#comparison)): no. No recommended source offers push (no WebSub hub in any RSS; USGS, GDACS and EONET are poll-only). Push (D-003) will not be built |
 | Q5 | Does Slack OAuth accept a `http://localhost` redirect URL? | **Answered from Slack's docs in M3** ([data sources](../03-research/data-sources.md#q5-slack-oauth-redirect-on-localhost)): "The redirect_uri must use HTTPS", so `http://localhost` is not accepted. Whether `https://localhost` is accepted is *unverified*, to be settled by the author's real test (D-023). The README will document the HTTPS workaround; reviewers still have the webhook option |
-| Q6 | Which SQLite driver works with `npm install` alone? | **Deferred** to project setup. Native modules (e.g. `better-sqlite3`) can fail to build; Node's built-in `node:sqlite` depends on the Node version |
+| Q6 | Which SQLite driver works with `npm install` alone? | **Closed** ([D-032](../05-decisions/decision-log.md#d-032-node-22-lts)): `better-sqlite3` 13 on Node 22.12+. It ships prebuilt binaries in its npm package, so nothing is compiled, but npm still runs a no-op `node-gyp rebuild` that needs Python and `make` (*unverified* whether install fails without them). On Node 20 it had to be compiled from source |
 
 ## Later (out of scope for the 24-hour build)
 

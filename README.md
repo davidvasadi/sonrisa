@@ -21,7 +21,23 @@ Also: [notes](process/notes/) and [scripts](process/scripts/). Rules given to th
 
 ## [app/](app/) — the system
 
-The implementation. Empty for now; setup and run instructions will go here once it exists.
+The implementation: `app/server` (Node + TypeScript, Express, SQLite) and `app/web` (React + Vite + shadcn/ui).
+
+### Run it
+
+Requires **Node 22.12 or newer** ([D-032](process/05-decisions/decision-log.md#d-032-node-22-lts)). With nvm, `nvm use` picks it up from [.nvmrc](.nvmrc).
+
+```sh
+npm install
+npm run dev        # API + worker on :3001, web on http://localhost:5173
+npm test
+```
+
+`npm install` may also need Python 3 and `make`: npm runs a `node-gyp` step for `better-sqlite3`. It compiles nothing, because a prebuilt binary is bundled, but node-gyp itself needs those tools ([R-016](process/06-ai-review/ai-review-log.md#r-016-better-sqlite3-13-still-runs-node-gyp)). macOS gets them with the Xcode Command Line Tools.
+
+No keys, no Docker, no `.env` needed (D-009). Everything in [.env.example](.env.example) is optional: SMTP and the Slack app switch on when set. The SQLite database is created at `app/server/data/sonrisa.db` (git-ignored); delete it to start fresh.
+
+The admin layout and UI components come from [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) (MIT); see [app/web/THIRD-PARTY-NOTICES.md](app/web/THIRD-PARTY-NOTICES.md).
 
 > **Local demo only.** There is no authentication: the user view uses a simple user picker, and the admin view is open to anyone who can reach the app, including all users' data and failed deliveries. Do not expose it on a network. See [D-006](process/05-decisions/decision-log.md#d-006-two-views-no-authentication).
 

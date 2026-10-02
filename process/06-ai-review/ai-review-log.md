@@ -242,3 +242,53 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
   - `git log --all -S` and `git grep` over all reachable commits find no copy.
   - Obvious placeholders (`xoxb-1234-abcdefgh`, `xoxp-XXXX…`) were left as fetched.
 - Related decision: none
+
+## R-016: better-sqlite3 13 still runs node-gyp
+
+- Date: 2026-10-02
+- Prompt / session: [P-025](../07-prompts/session-log.md#p-025-node-22-and-template)
+- What the AI produced: D-032 and Q6 saying that `better-sqlite3` 13 "has no install script, so nothing is compiled. A clean install on Node 22 created no `build/` folder."
+- How I checked it: During /milestone-done, a clean install in a fresh copy of the files to be committed, then a reinstall of that one package with `--foreground-scripts`, and a reading of its `binding.gyp` and `lib/binding.js`.
+- What I found:
+  - The lockfile has `hasInstallScript: true`. npm adds `node-gyp rebuild` automatically because the package contains a `binding.gyp`.
+  - That file is deliberately a no-op when a prebuilt binary exists (`prebuild_exists`): it finished in 660 ms and wrote only stamp files, and the library loaded its bundled binary. So nothing is compiled, but node-gyp still runs and needs Python and `make`.
+  - The AI's earlier observation (no `build/` folder in the working copy) was real, but it didn't support the general claim. The clean install showed otherwise.
+- Verdict: corrected
+- What changed as a result: D-032 and Q6 were rewritten. The README says install may need Python and `make`. Whether `npm install` fails on a machine without them is marked *unverified*.
+- Related decision: D-032
+
+## R-017: Node 20 version check caught three incompatible packages and a native build
+
+- Date: 2026-10-02
+- Prompt / session: [P-024](../07-prompts/session-log.md#p-024-approve-m4-entries-build-the-m5-skeleton)
+- What the AI produced: The M5 dependency choices for Node 20.19.
+- How I checked it: Before installing, the AI read every package's `engines` field on npm. After `npm install --foreground-scripts`, it read the install log and listed `better-sqlite3`'s release assets per Node ABI (this machine's `process.versions.modules` is 115).
+- What I found:
+  - The newest `better-sqlite3` (13), `vitest` (5) and `concurrently` (10) require Node 22, so they would not have worked on 20.19.
+  - `better-sqlite3` 12.11.1 has prebuilt binaries only for ABIs 127, 137, 141 and 147, not for Node 20's ABI 115. The log showed "No prebuilt binaries found" and a node-gyp compile, which works only with build tools installed.
+  - `node:sqlite` is not available in Node 20 (`ERR_UNKNOWN_BUILTIN_MODULE`).
+- Verdict: accepted
+- What changed as a result: Pinned to Node-20 versions at first, then D-032 (Node 22) made the pins unnecessary. Q6 closed.
+- Related decision: D-032
+
+## R-018: First clean-copy check ran in the wrong folder
+
+- Date: 2026-10-02
+- Prompt / session: [P-025](../07-prompts/session-log.md#p-025-node-22-and-template) (/milestone-done for M5)
+- What the AI produced: A "fresh clone" check reporting a clean install and "Tests 8 passed (8)".
+- How I checked it: Read the whole output, not just the result. The listing of the copy was empty, and `app/server/data` contained `sonrisa.db`, which a fresh copy can't have.
+- What I found: Copying the deleted `app/.gitkeep` failed, which ended the `&&` chain before `cd`. The install and tests ran in the working folder, so the "pass" said nothing about a fresh clone.
+- Verdict: corrected
+- What changed as a result: The check was redone, skipping deleted files and printing and checking the working folder, file count, and the absence of `node_modules` and the database before installing. The valid run passed, and it is the run that exposed R-016.
+- Related decision: none
+
+## R-019: Mutation check of the dedup tests
+
+- Date: 2026-10-02
+- Prompt / session: [P-024](../07-prompts/session-log.md#p-024-approve-m4-entries-build-the-m5-skeleton)
+- What the AI produced: Schema tests for event dedup (`event_keys` primary key) and notification dedup (`deliveries` unique key).
+- How I checked it: Removed both constraints from `schema.sql`, ran the tests, then restored the file.
+- What I found: Exactly the two dedup tests failed (`Tests 2 failed | 6 passed (8)`); with the schema restored all 8 passed. The tests exercise the constraints, not a copy of them.
+- Verdict: accepted
+- What changed as a result: Nothing in the code. This kind of check is to be repeated for the M6/M7 dedup and matching logic.
+- Related decision: D-005

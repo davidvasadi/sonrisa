@@ -225,3 +225,37 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-023-close-m4.md](transcripts/P-023-close-m4.md).
 - Result summary: /milestone-done run for M4: tests and app skipped (no app yet), leak check OK, M4 marked done in the plan, review entries drafted for approval.
 - Follow-up: [R-014](../06-ai-review/ai-review-log.md#r-014-oauth-webhook-assumption-checked-against-slacks-stored-docs), [R-015](../06-ai-review/ai-review-log.md#r-015-slack-example-token-in-a-stored-raw-response) (both approved in P-024)
+
+## P-024: Approve M4 entries, build the M5 skeleton
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Keep R-014 and R-015 and commit M4. Then build the M5 skeleton:
+  - `app/server` and `app/web`, SQLite, and API + worker + web started by one `npm run dev`;
+  - `.env.example`, running tests, seeded demo users and the user picker;
+  - report whether SQLite needs a native build on Node 20.19 (Q6);
+  - suggest 2–3 MIT shadcn admin templates, checked on GitHub;
+  - list assumptions first, then report real test and app output.
+- Prompt: Verbatim in [transcripts/P-024-m5-skeleton.md](transcripts/P-024-m5-skeleton.md).
+- Result summary:
+  - M4 closed (`87bcdd1`).
+  - **Skeleton:** Express + `better-sqlite3` + core schema + seed + `/api/health` and `/api/users`; the worker is a stub; React + Vite picker; 8 server tests pass. A mutation check (dedup constraints removed) made exactly the two dedup tests fail.
+  - **Versions:** three newest packages (`better-sqlite3` 13, `vitest` 5, `concurrently` 10) require Node 22, so they were pinned to the last Node-20 versions.
+  - **Q6:** `better-sqlite3` 12.11.1 has no Node 20 prebuilt (release assets only for ABIs 127/137/141/147), so it compiled from source.
+  - **Templates:** three compared on GitHub, with stars, the last commit on the default branch (not `pushed_at`) and dependencies.
+- Follow-up: author decisions on Q6 and the template
+
+## P-025: Node 22 and template
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Switch to Node 22 via nvm without changing the global default, add `.nvmrc`, lift the Node-20 pins, and have the README say Node 22+. Use satnaing/shadcn-admin, copying only what's used and removing Clerk and login. Log both decisions and close M5.
+- Prompt: Verbatim in [transcripts/P-025-node-22-and-template.md](transcripts/P-025-node-22-and-template.md).
+- Result summary:
+  - **Node:** 22.23.3 installed via nvm; the default alias is still 20 (checked before and after).
+  - **Packages:** pins lifted. `better-sqlite3` 13 bundles prebuilt binaries in its npm package, though GitHub releases have no assets.
+  - **Template:** copied in part at `e16c87f`, with provenance lines and THIRD-PARTY-NOTICES. Own layout and hash switch instead of TanStack Router and Clerk.
+  - **Checks:** typecheck, build and tests pass. Headless Chrome screenshots of both views.
+  - **Logged:** D-032 and D-033; Q6 closed.
+  - **Corrections found while closing:** a first "fresh clone" check that ran in the wrong folder, and a wrong claim about node-gyp in D-032 (R-016).
+- Follow-up: R-016 to R-019 (approved in P-026), D-032, D-033
