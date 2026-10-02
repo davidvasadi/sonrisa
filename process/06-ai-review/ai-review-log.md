@@ -564,3 +564,31 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: corrected
 - What changed as a result: The fixes above. 128 tests pass. Typecheck is clean.
 - Related decision: D-001, D-030, D-034
+
+## R-036: Fresh-clone run of the final README
+
+- Date: 2026-10-02
+- Prompt / session: [P-036](../07-prompts/session-log.md#p-036-final-readme-close-m10)
+- What the AI produced: The final README, for a reviewer with 10 minutes: what it is, screenshots, quick start, a "Try it" walkthrough, Slack, a short architecture, links to the process docs and known limitations.
+- How I checked it:
+  - A script checked every relative link and anchor in the README.
+  - The repo was cloned fresh from `d8e0e5a` into a temp dir, with the new README copied in and an empty `.env`. Every README command was run from a minimal environment (only `HOME` and `PATH`).
+  - The "Try it" steps were followed in headless Chrome by clicking the real UI.
+- What I found:
+  - **Links:** two anchors in the first draft were wrong (D-027 and D-029 have longer titles). Both were caught by reading the headings before writing, and the link check then passed.
+  - **`nvm use`:** switched Node v20.19.5 to v22.23.3 from `.nvmrc`.
+  - **`npm install`, then `npm test`:** install exit 0, then 9 files and 128 tests passed.
+  - **`npm run dev`:** with no keys, email used the dev outbox and Slack said "paste a webhook".
+  - **Try it, step by step:**
+    1. The picker showed Ada, who had an email and a log destination.
+    2. Ticking GDACS · Earthquakes for Email and Log (stub) and saving showed "Saved."
+    3. In Admin, injecting GDACS / Earthquakes worked.
+    4. The Email outbox showed the `[DEMO]` email, Deliveries had 2 rows (email and log, both `sent`), the terminal printed `[log channel] [DEMO] Earthquake in China`, and the live feed showed the demo with "email (sent), log (sent)".
+  - **Slack:** the Connect button was disabled, with its note. A made-up `hooks.slack.com` URL was saved and shown masked (`…/••••1234`); a look-alike host was refused with 400.
+  - **`HTTPS=1 npm run dev`:** served https://localhost:5173 (web 200, `/api/health` 200 through the proxy).
+  - **Deleting the database:** the app started fresh and recreated it.
+  - **No README command failed.** The first two walkthrough runs failed only in the test script itself: the headless window was too narrow, so the sidebar collapsed, and the script pressed Inject before the dropdowns had loaded. Fixed in the script; the app was not changed.
+  - **Not run:** the Connect Slack OAuth flow (needs a Slack app; tested for real in M8), a real paste-webhook send, SMTP, and `EBADENGINE` on Node 20 (verified in M9, D-034).
+- Verdict: accepted
+- What changed as a result: README final. M10 marked done.
+- Related decision: D-009, D-034

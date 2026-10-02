@@ -384,3 +384,15 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
   - **Fixes:** masking failures can't stop dispatch; the connect banner shows only fixed messages, with the error detail in the server log; interrupted deliveries say the outcome is unknown; the design text is corrected. 128 tests pass, and the banner was checked in Chrome.
   - **Documented:** only the repo-root `.env` is supported (README, `.env.example`, Vite config).
 - Follow-up: [R-035](../06-ai-review/ai-review-log.md#r-035-m9-re-review-of-the-fixes)
+
+## P-036: Final README, close M10
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Rewrite the README for a reviewer with 10 minutes, including limitations (UX out of scope, the next step of separate user and admin apps with an admin login, and what is unverified). Run every README command in a fresh clone with an empty `.env`, export transcripts, close M10 and commit without asking again.
+- Prompt: Verbatim in [transcripts/P-036-final-readme-close-m10.md](transcripts/P-036-final-readme-close-m10.md).
+- Result summary:
+  - **README:** rewritten. Every link and anchor is checked.
+  - **Fresh clone:** every README command worked, and the walkthrough passed in Chrome. The only failures were in the test script itself.
+  - **M10:** closed.
+- Follow-up: [R-036](../06-ai-review/ai-review-log.md#r-036-fresh-clone-run-of-the-final-readme)
