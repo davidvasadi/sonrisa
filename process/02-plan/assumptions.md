@@ -36,7 +36,7 @@ Two kinds of entry:
 - **Decided ([D-013](../05-decisions/decision-log.md#d-013-categories-come-from-the-sources-not-a-fixed-list)):** For each category a user subscribes to, they pick which channels deliver it.
 - **Decided ([D-007](../05-decisions/decision-log.md#d-007-slack-oauth-if-configured-webhook-paste-otherwise), [D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Slack is a must-have, and so is the "Connect Slack" button ([D-021](../05-decisions/decision-log.md#d-021-connect-slack-button-is-a-must-have)). The button works when a Slack app is configured. When none is configured, it is shown but disabled, with a short note, and the paste-webhook option is next to it. Either way a webhook URL is stored, and both paths share one delivery path. Webhook URLs are always masked.
 - **Decided ([D-022](../05-decisions/decision-log.md#d-022-pasted-webhooks-only-to-hooksslackcom)):** A pasted webhook is accepted only if it is `https` on host `hooks.slack.com`.
-- **Decided ([D-023](../05-decisions/decision-log.md#d-023-slack-delivery-tested-with-a-mock-receiver-then-once-for-real)):** Slack delivery tests use a local mock receiver. The author tests both Slack paths once in a real free workspace and saves a screenshot.
+- **Decided ([D-023](../05-decisions/decision-log.md#d-023-slack-delivery-tested-with-a-mock-receiver-then-once-for-real)):** Slack delivery tests use a local mock receiver. The author tests both Slack paths once in a real free workspace and saves a screenshot. **Outcome (M8, corrected in M9):** only Connect Slack was tested for real; the pasted webhook only with the mock receiver; cancelling is untested.
 - **Decided ([D-010](../05-decisions/decision-log.md#d-010-email-via-smtp-if-configured-dev-outbox-otherwise)):** Email goes out over SMTP when SMTP is configured. Otherwise it goes to a dev outbox, which is visible in the admin view.
 - **Decided ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Each channel module owns the formatting of its own messages (HTML or text email, Slack blocks). This is core scope.
 
@@ -78,6 +78,7 @@ Raised in the [brief analysis](../03-research/brief-analysis.md) and deferred by
 - Unsubscribe links, consent, and destination verification before the first send
 - Audit trail of admin actions
 - Time zones and quiet hours
+- RSS items without a `guid`: BBC and UN News fall back to the item `link`, which has a different form from the guid (tracking query, `/feed/view/` path). An item seen once without a guid and once with one would be stored and notified twice. Every stored item has a guid, so it has never happened. Won't fix in this build (M9 review, [R-033](../06-ai-review/ai-review-log.md#r-033-m9-independent-review-whole-repo), finding 11)
 - Digests instead of immediate notifications
 - A test harness that replays recorded raw API responses through the pipeline
 - Authentication and roles

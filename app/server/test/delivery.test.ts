@@ -5,9 +5,10 @@ import { createEmailChannel } from '../src/channels/email.js';
 import { createLogChannel } from '../src/channels/log.js';
 import { createSlackChannel, realTransport, validateWebhookUrl, type Transport } from '../src/channels/slack.js';
 import type { Channel } from '../src/channels/types.js';
-import { deliver, failInterrupted } from '../src/dispatch.js';
+import { deliver, dispatch, failInterrupted, match } from '../src/dispatch.js';
 import { ingestPoll, registerSource } from '../src/ingest.js';
 import { injectDemo } from '../src/inject.js';
+import { loadDeliveryEvent } from '../src/message.js';
 import { seed } from '../src/seed.js';
 import { bbc } from '../src/sources/bbc.js';
 import { gdacs } from '../src/sources/gdacs.js';
@@ -45,6 +46,9 @@ const toMock: Transport = async (url, json) => {
 
 const WEBHOOK_OK = 'https://hooks.slack.com/services/TEST/BTEST/OK';
 const WEBHOOK_GONE = 'https://hooks.slack.com/services/TEST/BTEST/GONE';
+
+const channelOf = (t: { db: ReturnType<typeof freshDb> }, deliveryId: number) =>
+  (t.db.prepare('SELECT channel FROM deliveries WHERE id = ?').get(deliveryId) as { channel: string }).channel;
 
 // --- A DB with one new GDACS event (DR1018332, notify = 1) after a baseline poll.
 function setup() {
@@ -153,7 +157,111 @@ describe('failures are isolated and stored, no retries (D-030)', () => {
     const [eventId] = t.newEvent();
     t.db.prepare("INSERT INTO deliveries (event_id, user_id, channel, status, created_at) VALUES (?, 1, 'email', 'pending', 'x')").run(eventId);
     expect(failInterrupted(t.db)).toBe(1);
-    expect(t.db.prepare('SELECT status, error FROM deliveries').get()).toEqual({ status: 'failed', error: 'interrupted before send' });
+    expect(t.db.prepare('SELECT status, error FROM deliveries').get()).toEqual({ status: 'failed', error: 'interrupted: outcome unknown, it may have been delivered' });
+  });
+
+  it('a destination removed between matching and sending fails its delivery instead of leaving it pending', async () => {
+    const t = setup();
+    t.subscribe(1, 'gdacs:DR', 'email');
+    t.subscribe(1, 'gdacs:DR', 'log');
+    const ids = match(t.db, t.newEvent(), t.channels.map((c) => c.id));
+    t.db.prepare("DELETE FROM destinations WHERE user_id = 1 AND channel = 'email'").run();
+    const results = await dispatch(t.db, t.channels, ids);
+    expect(results.map((r) => [r.channel, r.status, r.error])).toEqual([
+      ['email', 'failed', 'destination removed before send'],
+      ['log', 'sent', null],
+    ]);
+    expect(count(t.db, "SELECT COUNT(*) n FROM deliveries WHERE status = 'pending'")).toBe(0);
+  });
+
+  it('a config that masking cannot handle fails only its own delivery, and the error text is hidden', async () => {
+    const t = setup();
+    t.db.prepare("INSERT INTO destinations (user_id, channel, config) VALUES (1, 'slack', ?)").run(JSON.stringify({ webhookUrl: 5 }));
+    t.subscribe(1, 'gdacs:DR', 'slack');
+    t.subscribe(1, 'gdacs:DR', 'log');
+    // The bad delivery goes first: before the fix, its throw stopped the one after it.
+    const ids = match(t.db, t.newEvent(), t.channels.map((c) => c.id));
+    const slackFirst = [...ids].sort((a, b) => Number(channelOf(t, b) === 'slack') - Number(channelOf(t, a) === 'slack'));
+    const results = await dispatch(t.db, t.channels, slackFirst);
+    expect(results.map((r) => [r.channel, r.status, r.error])).toEqual([
+      ['slack', 'failed', 'error text hidden: it could not be masked'],
+      ['log', 'sent', null],
+    ]);
+    expect(count(t.db, "SELECT COUNT(*) n FROM deliveries WHERE status = 'pending'")).toBe(0);
+  });
+
+  it('a destination config that is not JSON fails only its own delivery, without storing the config', async () => {
+    const t = setup();
+    t.db.prepare("UPDATE destinations SET config = 'secret-not-json' WHERE user_id = 1 AND channel = 'email'").run();
+    t.subscribe(1, 'gdacs:DR', 'email');
+    t.subscribe(1, 'gdacs:DR', 'log');
+    const results = await deliver(t.db, t.channels, t.newEvent());
+    expect(results.map((r) => [r.channel, r.status, r.error])).toEqual([
+      ['email', 'failed', 'destination config is not valid JSON'],
+      ['log', 'sent', null],
+    ]);
+  });
+});
+
+describe('secrets never reach a stored error (design F14)', () => {
+  const SECRET_URL = 'https://hooks.slack.com/services/TSECRET/BSECRET/abcdWXYZ';
+  const stored = (t: ReturnType<typeof setup>) => (t.db.prepare("SELECT error FROM deliveries WHERE channel = 'slack'").get() as { error: string }).error;
+
+  it('slack: a transport error that contains the webhook URL is stored masked', async () => {
+    const t = setup();
+    const throwing: Transport = async (url) => {
+      throw new Error(`connect ECONNREFUSED for ${url}`);
+    };
+    const channels = [...t.channels.filter((c) => c.id !== 'slack'), createSlackChannel({}, throwing)];
+    t.setSlack(1, SECRET_URL);
+    t.subscribe(1, 'gdacs:DR', 'slack');
+    const [r] = await deliver(t.db, channels, t.newEvent());
+    expect(r.status).toBe('failed');
+    expect(stored(t)).toBe('connect ECONNREFUSED for https://hooks.slack.com/…/••••WXYZ');
+    expect(stored(t)).not.toContain('TSECRET');
+  });
+
+  it('slack: a response body that echoes the webhook URL is stored masked', async () => {
+    const t = setup();
+    const echo: Transport = async (url) => ({ status: 400, body: `invalid url ${url}` });
+    const channels = [...t.channels.filter((c) => c.id !== 'slack'), createSlackChannel({}, echo)];
+    t.setSlack(1, SECRET_URL);
+    t.subscribe(1, 'gdacs:DR', 'slack');
+    await deliver(t.db, channels, t.newEvent());
+    expect(stored(t)).toBe('HTTP 400: invalid url https://hooks.slack.com/…/••••WXYZ');
+  });
+
+  it('slack send itself masks the URL, before dispatch scrubs anything (two layers)', async () => {
+    const t = setup();
+    const event = loadDeliveryEvent(t.db, t.newEvent()[0])!;
+    const throwing = createSlackChannel({}, async (url) => {
+      throw new Error(`failed: ${url}`);
+    });
+    const echo = createSlackChannel({}, async (url) => ({ status: 500, body: url }));
+    expect(await throwing.send({ webhookUrl: SECRET_URL }, event)).toEqual({ ok: false, error: 'failed: https://hooks.slack.com/…/••••WXYZ' });
+    expect(await echo.send({ webhookUrl: SECRET_URL }, event)).toEqual({ ok: false, error: 'HTTP 500: https://hooks.slack.com/…/••••WXYZ' });
+  });
+
+  it('dispatch: any channel error containing a secret field value is masked by the channel', async () => {
+    const t = setup();
+    // A channel that leaks its secret in the error text, and throws it too: dispatch must scrub both.
+    const leaky = (mode: 'return' | 'throw'): Channel => ({
+      ...createLogChannel(() => {}),
+      id: `leaky-${mode}`,
+      fields: [{ name: 'token', label: 'Token', secret: true }],
+      mask: () => ({ token: '••••' }),
+      send: async (config) => {
+        if (mode === 'throw') throw new Error(`bad token ${config.token}`);
+        return { ok: false, error: `bad token ${config.token}` };
+      },
+    });
+    for (const mode of ['return', 'throw'] as const) {
+      t.db.prepare('INSERT INTO destinations (user_id, channel, config) VALUES (1, ?, ?)').run(`leaky-${mode}`, JSON.stringify({ token: 's3cr3t' }));
+      t.subscribe(1, 'gdacs:DR', `leaky-${mode}`);
+    }
+    const results = await deliver(t.db, [...t.channels, leaky('return'), leaky('throw')], t.newEvent());
+    expect(results.map((r) => r.error)).toEqual(['bad token ••••', 'send threw: bad token ••••']);
+    expect(count(t.db, "SELECT COUNT(*) n FROM deliveries WHERE error LIKE '%s3cr3t%'")).toBe(0);
   });
 });
 
@@ -170,7 +278,7 @@ describe('slack (mock receiver)', () => {
     expect(received).toHaveLength(1);
     expect(received[0].path).toBe('/services/TEST/BTEST/OK');
     const text = JSON.parse(received[0].body).text as string;
-    expect(text.split('\n')[0]).toBe('*<https://www.gdacs.org/report.aspx?eventid=1018332&episodeid=24&eventtype=DR|Floods &amp; &lt;storms&gt;>*');
+    expect(text.split('\n')[0]).toBe('*<https://www.gdacs.org/report.aspx?eventid=1018332&amp;episodeid=24&amp;eventtype=DR|Floods &amp; &lt;storms&gt;>*');
   });
 
   it('a redirect is refused, not followed (SSRF)', async () => {
@@ -307,5 +415,16 @@ describe('email', () => {
     expect(sent).toHaveLength(1);
     expect(sent[0].to).toBe('ada@example.com');
     expect(count(db, 'SELECT COUNT(*) n FROM outbox')).toBe(0);
+  });
+
+  it('a title with line breaks cannot add a header: CR and LF are removed from the subject', async () => {
+    const t = setup();
+    t.subscribe(1, 'gdacs:DR', 'email');
+    const [eventId] = t.newEvent();
+    t.db.prepare('UPDATE events SET title = ? WHERE id = ?').run('Floods\r\nBcc: victim@example.com\nX: y', eventId);
+    await deliver(t.db, t.channels, [eventId]);
+    const { subject } = t.db.prepare('SELECT subject FROM outbox').get() as { subject: string };
+    expect(subject).not.toMatch(/[\r\n]/);
+    expect(subject).toContain('Floods Bcc: victim@example.com X: y');
   });
 });

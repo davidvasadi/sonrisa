@@ -22,20 +22,22 @@ export function LiveProvider({ children }: { children: ReactNode }) {
 export const useLive = () => useContext(LiveContext);
 
 // Fetches JSON and refetches on every live change. `url` null means "nothing to load yet".
+// Data is kept with the URL it came from, so after the URL changes (another user) the old
+// data is never returned: callers see null until the new URL has loaded.
 export function useLiveJson<T>(url: string | null): { data: T | null; error: string | null; reload: () => void } {
   const { version } = useLive();
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<{ url: string; data: T | null; error: string | null } | null>(null);
   const [nonce, setNonce] = useState(0);
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
     getJson<T>(url)
-      .then((d) => !cancelled && (setData(d), setError(null)))
-      .catch((e: Error) => !cancelled && setError(e.message));
+      .then((d) => !cancelled && setState({ url, data: d, error: null }))
+      .catch((e: Error) => !cancelled && setState((s) => ({ url, data: s?.url === url ? s.data : null, error: e.message })));
     return () => {
       cancelled = true;
     };
   }, [url, version, nonce]);
-  return { data, error, reload: () => setNonce((n) => n + 1) };
+  const current = state && state.url === url ? state : null;
+  return { data: current?.data ?? null, error: current?.error ?? null, reload: () => setNonce((n) => n + 1) };
 }

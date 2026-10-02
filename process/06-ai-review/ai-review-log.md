@@ -208,7 +208,7 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 | F14 | OAuth `access_token` could be logged or stored | fix | Token discarded; raw response never logged; only Slack's `error` kept |
 | F15 | "Stub uses only its own file" listed as a test that can't fail | fix | Test row removed; the evidence is the commit diff that adds the stub |
 | S1 | Admin overview doesn't show users (plan M8) | add | Overview returns users with subscriptions and masked destinations |
-| S2 | Slack denial not handled | handle simply | Callback without `code` → "Slack not connected"; checked in the real test (D-023) |
+| S2 | Slack denial not handled | handle simply | Callback without `code` → "Slack not connected"; checked in the real test (D-023). *Correction (M9, R-033): never checked for real; cancelling is untested* |
 | S3 | GDACS `datemodified` time zone | mark | Marked *assumed UTC, unverified* |
 
 - Verdict: corrected
@@ -496,3 +496,71 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: corrected
 - What changed as a result: Vite uses `strictPort: true`, so it fails loudly instead of moving. The check was redone after confirming both ports were free, and it stopped only its own processes. The author was told.
 - Related decision: D-021
+
+## R-033: M9 independent review (whole repo)
+
+- Date: 2026-10-02
+- Prompt / session: review in [P-033](../07-prompts/session-log.md#p-033-m9-independent-review), checks and fixes in [P-034](../07-prompts/session-log.md#p-034-m9-check-and-fix-the-findings)
+- What the AI produced: The `code-reviewer` agent (read-only, fresh context) reviewed the whole repo: 12 findings (4 medium, 8 low) and 2 unverified suspicions. It reported invented API fields, SSRF, secrets, injection and hollow tests as clean.
+- How I checked it: The main session re-read every cited line. It reproduced the suspicions by running the server. Each fix got a test, and each new test was run against the old code (a mutation) to show it fails there. The UI fix was checked in headless Chrome with the subscriptions request forced to fail.
+- What I found, and the author's decision per finding:
+
+| # | Finding | Check | Author's decision | What changed |
+| --- | --- | --- | --- | --- |
+| 1 | Item normalise errors are only counted. The feed shows healthy and is still baselined, so a source that changes shape is a silent outage, then a flood once items parse again | Valid (ingest.ts) | fix | A feed whose items **all** fail counts as a failed fetch: error shown, not baselined. Some failed: the feed is baselined, and "k of n items failed to normalise: …" is shown as its error. The worker log prints the messages. 3 tests; all 3 fail on the old code. Still open: an item that failed during the baseline and parses later is notified as new (design F3 note) |
+| 2 | `startWorker` (poll → deliver) has no test | Valid. One claim is wrong: passing `baselineEventIds` to `deliver` would *not* flood anyone, because `match` only selects `notify = 1` events (mutation run: all tests pass, behaviour unchanged) | fix | New `worker.test.ts`: a new event after the baseline is delivered once, the baseline never; no overlapping polls; a failed fetch is logged and the next poll runs. Removing the `deliver` call fails test 1; removing the overlap guard fails test 2 |
+| 3 | The subscription grid renders before the saved subscriptions load. Save replaces the whole set, so a failed or slow load plus one click deletes them all; switching user shows the previous user's set | Valid. Confirmed in Chrome with the subscriptions request answering 500: the old code showed 93 unchecked boxes | fix | The grid waits for `saved` and shows "Could not load" on error. `useLiveJson` keeps data with its URL and never returns another URL's data. Chrome re-check: 0 boxes, "Could not load: … HTTP 500". The user-switch race was fixed by reading the code, not reproduced in a browser |
+| 4 | Dispatch: a destination removed mid-dispatch leaves the delivery `pending`; a bad config `JSON.parse` outside the try aborts the rest of the loop | Valid (dispatch.ts) | fix | LEFT JOIN: marked `failed` "destination removed before send". Bad JSON: `failed` "destination config is not valid JSON" (the config text is never stored). 2 tests, both fail on the old code |
+| 5 | Vite proxies to `process.env.PORT`, which does not include the root `.env`; `PORT=4000` in `.env` breaks the UI | Valid. Not run on the old code; fix verified by running it | fix | `vite.config.ts` loads the root `.env` with Vite's `loadEnv`. Run with `PORT=4000` in `.env`: API on 4000, `/api/health` through :5173 → 200, SSE → 200 |
+| 6 | The user view hard-codes the `slack` hash and "Slack connected" (D-001); the seed names channels | Valid | fix the text; seed is fine | The hash is now `#/?connect=<channel id>&result=…`, and the text uses the channel's `label` from `/api/channels`. The web code names no channel. OAuth tests updated |
+| 7 | The plan's M8 row, assumptions, design (S2) and this log claim both Slack paths, and cancelling, were tested for real | Valid for the plan row, assumptions, design and the S2 row. D-023's own "Done in M8" note was already accurate | fix the docs | Corrected: only Connect Slack (OAuth) was tested for real; the pasted webhook only with the mock (plus R-025's real 404); cancel untested. README "Known gaps" says so |
+| 8 | No test covers `scrub()` (dispatch) or `hide()` (Slack) | Valid. Mutation: removing `hide` alone still passed even with the new end-to-end tests, because `scrub` masks the same URL in the same format. The layers overlap | fix | Tests: Slack transport error and echoed body stored masked; Slack `send` masks by itself (fails without `hide`); a generic channel leaking a secret, returned or thrown, is scrubbed (fails without `scrub`) |
+| 9 | OAuth callback `catch {}` logs nothing; `remove()` has no try/catch | Valid | fix | The exchange error message is logged (cut to 200 chars; never the request or response). Test: logged, and without the client secret. `remove()` shows the error in the form |
+| 10 | `&` in Slack link URLs not escaped; the stored doc says `&`, `<`, `>` "must be converted to HTML entities if they're not going to be used for their parsing purpose" | Valid against the stored doc | fix | The link URL goes through the same escaping; `\|` is percent-encoded. Test updated (`&amp;` in the GDACS link). *Unverified:* how Slack renders it; not sent to a real workspace |
+| 11 | No `guid`: the RSS fallback to `link` has a different form, so one story could be stored twice | Valid, never observed (every stored item has a guid) | **won't fix** | Added to the Later list in [assumptions](../02-plan/assumptions.md#later-out-of-scope-for-the-24-hour-build) |
+| 12 | Design doc drift: Slack `blocks`, `{ webhookUrl, channelLabel }`, `send(NormalisedEvent)` | Valid | fix | Design now says `{ text }` only, label in `destinations.label`, `send(DeliveryEvent)`, and `status().connect`. Note: D-017's wording "Slack blocks" also differs from the code (text only); D-017 is the author's, so it is left as written |
+| S-a | Ctrl+C may hang with an SSE client open | Partly valid. With plain `node`/`tsx` (as `npm start` runs it) and an open SSE stream, SIGINT left the server running, and the in-flight poll crashed with "The database connection is not open". Under `npm run dev` it did not hang: tsx force-kills the process (all exited in 1 s with the old code) | fix | `shutdown()` closes all connections and calls `process.exit(0)`. Re-run: exit code 0 within 2 s, no crash line; `npm run dev` also exits cleanly |
+| S-b | Email subject header injection from feed titles | Unverified whether nodemailer strips CR/LF; not checked against its docs | fix ourselves | CR and LF are replaced with a space in the subject. Test with `\r\nBcc:` in a title |
+
+- Verdict: corrected (12 valid findings, one with a wrong sub-claim; one suspicion partly valid, one unverified and fixed anyway)
+- What changed as a result: The fixes above. 127 tests pass (113 before). Typecheck is clean for server and web.
+- Related decision: D-001, D-014, D-023, D-027, D-034
+
+## R-034: The app crashed silently on Node 20; lockfile out of date
+
+- Date: 2026-10-02
+- Prompt / session: [P-033](../07-prompts/session-log.md#p-033-m9-independent-review) (run by the main session; the review agent can't run anything)
+- What the AI produced: A no-keys start check in a clean copy of HEAD with an empty environment (only `PATH` and `HOME`).
+- How I checked it: Ran `npm install && npm run dev` and probed `/api/health` and `:5173`.
+- What I found:
+  - On the shell's default Node 20.19.5, install succeeded. The API server then crashed with a segfault (exit 139) and printed nothing, while the web server answered 200. The full environment crashed the same way, so the cause was the Node version, not missing keys.
+  - On Node 22.23.3: everything started with no keys (email "dev outbox", Slack "paste a webhook", all 4 sources polled, health 200).
+  - A clean `npm install` added `"hasInstallScript": true` for `better-sqlite3` to `package-lock.json`, so the committed lockfile was not what npm generates.
+- Verdict: corrected
+- What changed as a result: [D-034](../05-decisions/decision-log.md#d-034-enforce-node-22-at-install-and-start): `engine-strict` plus a startup check, both verified on Node 20. The regenerated lockfile was committed on its own (bb6bc62).
+- Related decision: D-032, D-034
+
+## R-035: M9 re-review of the fixes
+
+- Date: 2026-10-02
+- Prompt / session: review in [P-034](../07-prompts/session-log.md#p-034-m9-check-and-fix-the-findings), decisions and fixes in [P-035](../07-prompts/session-log.md#p-035-m9-re-review-fixes-close-m9)
+- What the AI produced: A second `code-reviewer` pass (read-only, fresh context) on only the files changed since b7cf759.
+- How I checked it: Shown to the author as reported, then fixed as the author decided. Each code fix has a test that fails on the code before the fix where it can be tested. The banner was checked in headless Chrome.
+- What I found: 0 critical, 0 high, 0 medium, 7 low. It found every R-033 fix correct by reading, except where noted below. It found no remaining `slack=` hash anywhere.
+
+| # | Finding | Author's decision | What changed |
+| --- | --- | --- | --- |
+| 1 | Fix 4 incomplete: `scrub()` runs outside any try. Valid-JSON config with a non-string secret (e.g. `{"webhookUrl":5}`) makes `maskWebhookUrl` throw, which aborts the dispatch loop and leaves later deliveries `pending` | fix | `scrub` is wrapped: on failure the stored error is "error text hidden: it could not be masked" (never the unmasked text), and the loop goes on. The test sends the bad delivery first; on the old code it fails with `url.slice is not a function` |
+| 2 | The connect-result text takes `connect` and `result` from the hash, so a crafted link can show any text in a status box. Escaped by React, so no XSS; local demo | fix: only fixed messages, no text from the URL | The banner shows only "<label> connected.", "<label> was not connected." or "<label> connection failed.", and only for a registered channel. An unknown channel shows nothing. Slack's error name, no longer shown, is logged by the server (`slack oauth: error:…`, tested). Chrome check: `connect=Your bank` → no banner; `connect=slack&result=error:call 555 now` → "Slack connection failed.", no "555" on the page |
+| 3 | Vite `loadEnv` also reads `.env.local` and `.env.development[.local]`; the server reads only `.env`. `PORT` only in `.env.local` would split them | document only: only `.env` is supported | Said in README, `.env.example` and the `vite.config.ts` comment. No code change |
+| 4 | "Interrupted before send" is wrong for a send cut off after Slack or SMTP received it. Pre-existing F8 wording; Ctrl+C mid-dispatch now reaches it | fix: say the outcome is unknown | The error is now "interrupted: outcome unknown, it may have been delivered", and the start-up log says "(outcome unknown)". The status stays `failed` (no new status). Design F8 and code comments updated; test updated |
+| 5 | design.md says "Slack not connected"; the code says "Slack was not connected." | fix | Design text matches the code and lists the three fixed messages |
+| 6 | design.md says "<label> not connected" appears next to subscriptions; it only appears on the channel form. Not touched in this change (pre-existing) | fix | Both design lines now describe what the UI does |
+| 7 | P-034 pointed to R-035 before it existed | fixed by this entry | — |
+
+- Unverified suspicions it raised, left as they are by the author's decision:
+  - Node's JSON parse error message includes a short snippet of the response body, and the OAuth log line would print it. Not checked; the client secret can't be in it.
+  - The 2 s `until` timeouts in `worker.test.ts` could be tight on a loaded CI machine. Not seen in any local run this session.
+- Verdict: corrected
+- What changed as a result: The fixes above. 128 tests pass. Typecheck is clean.
+- Related decision: D-001, D-030, D-034

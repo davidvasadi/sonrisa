@@ -92,6 +92,8 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
   );
 
   const entries: { event: NormalisedEvent; feedKey: string }[] = [];
+  // Item errors per feed: a feed whose items all fail is a failed feed, not a quiet one (D-014).
+  const failedItems = new Map<string, { count: number; first: string }>();
   for (const r of results) {
     if (!r.ok) continue;
     for (const item of r.items) {
@@ -99,14 +101,22 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
       try {
         entries.push({ event: source.normalise(item, r.feedKey), feedKey: r.feedKey });
       } catch (e) {
-        report.itemErrors.push(`${r.feedKey}: ${(e as Error).message}`);
+        const message = (e as Error).message;
+        report.itemErrors.push(`${r.feedKey}: ${message}`);
+        const f = failedItems.get(r.feedKey);
+        if (f) f.count += 1;
+        else failedItems.set(r.feedKey, { count: 1, first: message });
       }
     }
   }
+  const itemError = (r: { feedKey: string; items: unknown[] }) => {
+    const f = failedItems.get(r.feedKey);
+    return f && { allFailed: f.count === r.items.length, text: `${f.count} of ${r.items.length} items failed to normalise: ${f.first}` };
+  };
 
   const store = storeFor(db, source, report);
   const feedAttempt = db.prepare(
-    'UPDATE feeds SET last_attempt_at = ?, last_success_at = ?, last_error = NULL WHERE source_id = ? AND feed_key = ?',
+    'UPDATE feeds SET last_attempt_at = ?, last_success_at = ?, last_error = ? WHERE source_id = ? AND feed_key = ?',
   );
   const feedFailed = db.prepare('UPDATE feeds SET last_attempt_at = ?, last_error = ? WHERE source_id = ? AND feed_key = ?');
   const setBaselined = db.prepare(
@@ -114,13 +124,19 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
   );
 
   db.transaction(() => {
+    // A feed whose every item failed to normalise counts as failed: no success, no baseline,
+    // so it can't flood anyone once its items parse again (design F3). Some failed items are
+    // shown as the feed's error but the feed still counts as fetched.
+    const baselineable: string[] = [];
     for (const r of results) {
-      if (r.ok) {
+      const failed = r.ok ? itemError(r) : undefined;
+      if (r.ok && !failed?.allFailed) {
         report.feedsOk += 1;
-        feedAttempt.run(at, at, source.id, r.feedKey);
+        feedAttempt.run(at, at, failed?.text ?? null, source.id, r.feedKey);
+        baselineable.push(r.feedKey);
       } else {
         report.feedsFailed += 1;
-        feedFailed.run(at, r.error, source.id, r.feedKey);
+        feedFailed.run(at, r.ok ? failed!.text : r.error, source.id, r.feedKey);
       }
     }
 
@@ -130,7 +146,7 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
     }
 
     // A feed's first successful fetch is its baseline (D-027). Failed feeds stay un-baselined.
-    for (const r of results) if (r.ok) setBaselined.run(at, source.id, r.feedKey);
+    for (const feedKey of baselineable) setBaselined.run(at, source.id, feedKey);
   })();
 
   return report;

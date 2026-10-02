@@ -33,7 +33,9 @@ export function summary(source: Source, r: IngestReport): string {
   return (
     `poll ${source.id}: feeds ${r.feedsOk} ok / ${r.feedsFailed} failed, items ${r.items}, ` +
     `new ${r.newEventIds.length}, baseline ${r.baselineEventIds.length}, known ${r.knownEvents}` +
-    (r.itemErrors.length ? `, item errors ${r.itemErrors.length}` : '') +
+    (r.itemErrors.length
+      ? `, item errors ${r.itemErrors.length} (${r.itemErrors.slice(0, 3).join('; ')}${r.itemErrors.length > 3 ? '; …' : ''})`
+      : '') +
     (r.unknownCategories.length ? `, new categories ${r.unknownCategories.join(',')}` : '')
   );
 }

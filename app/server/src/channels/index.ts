@@ -8,7 +8,7 @@ import type { Channel, ChannelDeps } from './types.js';
 export function createChannels({ db, env, log }: ChannelDeps): Channel[] {
   return [
     createEmailChannel(db, env),
-    createSlackChannel(env, undefined, { db, save: (userId, config, label) => saveDestination(db, userId, 'slack', config, label) }),
+    createSlackChannel(env, undefined, { db, log, save: (userId, config, label) => saveDestination(db, userId, 'slack', config, label) }),
     createLogChannel(log),
   ];
 }

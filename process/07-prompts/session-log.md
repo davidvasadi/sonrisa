@@ -350,3 +350,37 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
   - **Tests:** a per-feed test checks the category and the item's origin. A relabelling mutation fails 15 of the 17; economic development still passes because the same story really is in that feed too. 113 tests pass.
   - **Logged:** R-026 updated. No demo item is relabelled any more.
 - Follow-up: [R-026](../06-ai-review/ai-review-log.md#r-026-demo-content-did-not-match-the-chosen-category)
+
+## P-033: M9 independent review
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5; review by the `code-reviewer` subagent (read-only)
+- Goal: Run the independent reviewer on the whole repo (dedup and matching, invented API fields, swallowed errors, useless tests, secrets, SSRF, no-keys start) and show the findings unchanged, with no fixes yet.
+- Prompt: Verbatim in [transcripts/P-033-m9-independent-review.md](transcripts/P-033-m9-independent-review.md).
+- Result summary:
+  - **Review:** 12 findings (4 medium, 8 low) and 2 unverified suspicions; shown to the author as reported.
+  - **No-keys start, run by the main session:** fine on Node 22 with an empty environment. On Node 20 the API segfaulted silently, and a clean install changed the lockfile.
+- Follow-up: [R-033](../06-ai-review/ai-review-log.md#r-033-m9-independent-review-whole-repo), [R-034](../06-ai-review/ai-review-log.md#r-034-the-app-crashed-silently-on-node-20-lockfile-out-of-date)
+
+## P-034: M9, check and fix the findings
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Check each finding independently, fix the ones chosen (won't fix 11), enforce Node 22, commit the regenerated lockfile, log every call, then re-review only what changed.
+- Prompt: Verbatim in [transcripts/P-034-m9-check-and-fix.md](transcripts/P-034-m9-check-and-fix.md).
+- Result summary:
+  - **Checks:** all 12 findings valid. Finding 2 has one wrong sub-claim (baseline events can't be delivered: `match` requires `notify = 1`). Finding 7 is overstated for D-023 itself. The Ctrl+C hang happens with plain `node`/`tsx`, not under `npm run dev`.
+  - **Fixes:** made as decided, each with a test that fails on the old code where testable. The UI fix was checked in headless Chrome. Node 20: install fails with `EBADENGINE`, and the server prints the required version (D-034). The lockfile was committed (bb6bc62). 127 tests pass.
+  - **Re-review:** see R-035.
+- Follow-up: [R-033](../06-ai-review/ai-review-log.md#r-033-m9-independent-review-whole-repo), [D-034](../05-decisions/decision-log.md#d-034-enforce-node-22-at-install-and-start)
+
+## P-035: M9 re-review fixes, close M9
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Fix re-review findings 1, 2, 4, 5 and 6; document 3 (only `.env` is supported); leave the suspicions noted; log the calls; close M9 with /milestone-done and commit without asking again.
+- Prompt: Verbatim in [transcripts/P-035-m9-re-review-fixes-close.md](transcripts/P-035-m9-re-review-fixes-close.md).
+- Result summary:
+  - **Fixes:** masking failures can't stop dispatch; the connect banner shows only fixed messages, with the error detail in the server log; interrupted deliveries say the outcome is unknown; the design text is corrected. 128 tests pass, and the banner was checked in Chrome.
+  - **Documented:** only the repo-root `.env` is supported (README, `.env.example`, Vite config).
+- Follow-up: [R-035](../06-ai-review/ai-review-log.md#r-035-m9-re-review-of-the-fixes)

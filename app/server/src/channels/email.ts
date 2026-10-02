@@ -12,7 +12,9 @@ const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 export function render(e: DeliveryEvent, to: string, from: string): Mail {
-  const subject = `${prefix(e)}${e.title}`;
+  // The title comes from a feed: no CR or LF may reach the Subject header (header injection).
+  // Not left to nodemailer: its handling of line breaks in headers is unverified here.
+  const subject = `${prefix(e)}${e.title}`.replace(/[\r\n]+/g, ' ');
   const lines = facts(e);
   const text = [e.title, '', ...lines, ...(e.link ? ['', e.link] : [])].join('\n');
   const html =

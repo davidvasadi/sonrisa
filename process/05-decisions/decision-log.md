@@ -292,7 +292,7 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 - Decision: Automated tests send to a local mock receiver. The author creates a free Slack workspace at M7/M8, tests both connection paths for real once, and saves a screenshot.
 - Why: Author decision. Tests stay key-free and repeatable; one real send proves the integration.
 - AI involvement: Gap raised by the AI in P-015; the approach is the author's.
-- Consequences / trade-offs: The mock only proves we send what we think Slack expects; the real test and screenshot are the proof that Slack accepts it. **Done in M8 (P-030):** the author connected a free workspace through Connect Slack on `https://localhost`, and a demo delivery arrived in `#new-channel` ([message](../08-screenshots/m8-slack-real-message.png), [admin](../08-screenshots/m8-admin-slack-sent.png)). Not tested: cancelling on Slack's approval page. Note: with D-022, tests must allow the mock's host only in test configuration, never in normal runs.
+- Consequences / trade-offs: The mock only proves we send what we think Slack expects; the real test and screenshot are the proof that Slack accepts it. **Done in M8 (P-030):** the author connected a free workspace through Connect Slack on `https://localhost`, and a demo delivery arrived in `#new-channel` ([message](../08-screenshots/m8-slack-real-message.png), [admin](../08-screenshots/m8-admin-slack-sent.png)). Not tested: cancelling on Slack's approval page. **Not done:** a real test of the pasted-webhook path. Paste is tested only with the mock receiver, plus one real `404 no_team` from Slack's documentation placeholder URL ([R-025](../06-ai-review/ai-review-log.md#r-025-real-slack-error-body-is-the-error-name)); found in the M9 review ([R-033](../06-ai-review/ai-review-log.md#r-033-m9-independent-review-whole-repo)). Note: with D-022, tests must allow the mock's host only in test configuration, never in normal runs.
 
 ## D-024: Market movements via BBC Business, no price feeds
 
@@ -424,3 +424,16 @@ All entries below were decided by the author, after the AI's [brief analysis](..
   - **Added:** 12 runtime and build dependencies (Radix primitives, Tailwind 4, lucide, cva, clsx, tailwind-merge), all MIT, Apache-2.0 or ISC.
   - **Future updates:** any later upgrade of the template is manual.
 
+
+## D-034: Enforce Node 22 at install and start
+
+- Date: 2026-10-02
+- Status: accepted (extends [D-032](#d-032-node-22-lts))
+- Context: In the M9 no-keys check, the app was started on the shell's default Node 20.19.5. `npm install` succeeded (npm only warns about `engines`), and the API server then crashed with a segfault (exit 139) and printed nothing, while the web server came up. A reviewer would see a half-working app with no reason given.
+- Options considered:
+  1. Leave it to the README.
+  2. `engine-strict=true` in `.npmrc`, so `npm install` fails on Node < 22.12, plus a version check at server start.
+- Decision: Option 2. The server's first import checks `process.versions.node` before `better-sqlite3` is loaded, prints the required version and exits with code 1.
+- Why: Author decision.
+- AI involvement: The AI found the crash by running the app; the fix is the author's choice.
+- Consequences / trade-offs: Verified on Node 20.19.5: `npm install` stops with `EBADENGINE` ("Required: {"node":">=22.12.0"}"); a server started on Node 20 after installing with Node 22 prints "sonrisa needs Node 22.12 or newer; this is Node 20.19.5. …" and exits 1. `npm run dev` itself is not checked: Vite still starts, but the server line says why the API is down.

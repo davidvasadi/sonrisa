@@ -184,7 +184,7 @@ oauth_states (state TEXT PK, user_id INTEGER, created_at TEXT)  -- slack channel
 
 ### First poll and old items
 **Decided (D-027).** Without a rule, the first poll of BBC World stores 30 existing stories, and every subscriber gets 30 messages at startup. M3 also showed that BBC section feeds contain old items (a 2025 story in top stories). Proposal:
-1. **Baseline, per feed and persisted (F3):** the first successful fetch of **each feed** (each URL polled: one for USGS and GDACS, 7 for BBC, 17 for UN News) stores its items with `notify = 0` and sets `feeds.baselined_at`. Later fetches of that feed store new items with `notify = 1`. Because `baselined_at` is in the database, a restart does not re-baseline. Items published while the app was down are notified on the next poll. A feed that fails on the first poll stays un-baselined until it succeeds, so it can't flood anyone later.
+1. **Baseline, per feed and persisted (F3):** the first successful fetch of **each feed** (each URL polled: one for USGS and GDACS, 7 for BBC, 17 for UN News) stores its items with `notify = 0` and sets `feeds.baselined_at`. Later fetches of that feed store new items with `notify = 1`. Because `baselined_at` is in the database, a restart does not re-baseline. Items published while the app was down are notified on the next poll. A feed that fails on the first poll stays un-baselined until it succeeds, so it can't flood anyone later. A fetch whose items **all** fail to normalise counts as a failed fetch (error shown, not baselined); if only some fail, the feed is fetched and baselined, and the error is shown on the feed. Known gap: an item that failed during the baseline poll and parses later is notified as new (M9, R-033).
 2. **Subscriptions apply forward only:** an event is delivered to a subscription only if `event.ingested_at >= subscription.created_at`. Subscribing doesn't pull in a backlog.
 
 Both rules are about *new vs already seen*, not importance, so D-018 holds.
@@ -219,17 +219,18 @@ interface Channel {
   fields: { name: string; label: string; secret: boolean }[];  // UI renders the destination form from this
   validate(config: unknown): { ok: true; config: Record<string, string> } | { ok: false; error: string };
   mask(config: Record<string, string>): Record<string, string>; // what the API/UI/logs may show
-  send(config: Record<string, string>, event: NormalisedEvent): Promise<{ ok: true } | { ok: false; error: string }>;
+  send(config: Record<string, string>, event: DeliveryEvent): Promise<{ ok: true } | { ok: false; error: string }>; // the stored event plus its source and category labels (message.ts)
   routes?(router: Router): void;               // optional extra HTTP routes (Slack OAuth)
-  status?(): { available: boolean; note?: string }; // e.g. "Slack app not configured"
+  status?(): { available: boolean; note?: string; connect?: { enabled: boolean; href: string; note?: string } }; // e.g. "Slack app not configured"; `connect` drives a generic Connect button
 }
 ```
 
 - **Formatting:** each channel renders its own messages: HTML and text email, Slack JSON. That is core scope under D-017.
 - **Registration:** channels are listed in `app/server/src/channels/index.ts`, one import plus one array entry each. That file belongs to the channels folder, not the core; matching, dispatch and the core API never name a channel.
 - **A channel can own its own table and admin panel (F7).** The email channel owns `outbox` and an "Outbox" panel in the admin view. The slack channel owns `oauth_states`. The module creates its own table at startup. The panel is a UI component next to the module's code, and the admin page lists it. Adding a channel that **needs** storage or a panel therefore means its own table plus one more panel entry on the admin page. That is an addition, not a change to matching, dispatch or the core tables, and no plugin system is built to avoid it. A channel like Discord (webhook only) needs neither.
-- **Not connected:** the user view shows "<channel label> not connected" for a subscription without a destination, using the channel's `label`.
+- **Not connected:** in the user view's Channels panel, a channel without a destination is shown as "not connected" under its `label`. The subscription grid shows no marker for a subscription whose channel has no destination (corrected in M9, R-035).
 - **Decided (D-029):** a one-line registry entry is not a core change under D-001.
+- **Connect result:** a connect flow sends the browser back to `#/?connect=<channel id>&result=connected|cancelled|error:…`. The user view shows the result using the channel's `label`, so it never names a channel (D-001, M9 R-033).
 
 ### The stub `log` channel (D-019)
 - **Behaviour:** `fields: []`, `validate` always succeeds, and `send` writes one line to the server log and returns `{ ok: true }`.
@@ -255,7 +256,7 @@ There are no changes to the core tables, matching, dispatch, the API or the UI. 
 - **One renderer:** both paths share the same rendering, so the outbox shows exactly what SMTP would send.
 
 ### Slack: the Connect Slack button, with webhook paste as the fallback (D-007, D-021, D-022)
-Both paths end in the same stored destination: `{ webhookUrl, channelLabel }`. Delivery code is shared (D-017).
+Both paths end in the same stored destination: config `{ webhookUrl }`, plus the Slack channel name (from OAuth) in the `destinations.label` column. Delivery code is shared (D-017).
 
 **Paste:**
 - The user pastes a URL.
@@ -270,11 +271,12 @@ Both paths end in the same stored destination: `{ webhookUrl, channelLabel }`. D
   3. `GET /api/slack/oauth/callback` checks that `state` exists and is under 10 min old: "If it doesn't match … consider the authorization a forgery". It deletes the state, then POSTs `code`, `client_id`, `client_secret` and `redirect_uri` to `https://slack.com/api/oauth.v2.access`. The doc says the same `redirect_uri` must be sent again.
   4. From the response it reads `ok` and `incoming_webhook.url`, plus `incoming_webhook.channel` for the label. It runs the **same `validate`** as paste, so D-022 applies to OAuth too, then stores the destination.
   5. **Token discarded (F14):** the response also contains an `access_token`. It is never stored, logged or returned. The raw response is never logged. On `ok: false`, only Slack's `error` field is kept.
-- **User declines in Slack:** any callback without a `code` (Slack's exact denial parameters are *unverified*) deletes the state and returns the user to the user view with "Slack not connected". This is checked in the author's real test (D-023).
+- **User declines in Slack:** any callback without a `code` (Slack's exact denial parameters are *unverified*) deletes the state and returns the user to the user view with "Slack was not connected." The banner shows only fixed messages ("<label> connected.", "<label> was not connected.", "<label> connection failed.") for a registered channel; no text from the URL is shown, and an error's detail goes to the server log. *Untested for real:* the author's real test (D-023) covered only a successful connect, not cancelling. The automated test sends a callback without a `code`.
 - **The redirect URI must use HTTPS.** This is Q5. The README documents the local HTTPS workaround, and whether `https://localhost` works is settled by your real test (D-023).
 
 **Sending:**
-- `send` POSTs `{ "text": …, "blocks": [...] }` to the webhook. Success is HTTP 200 with body `ok`.
+- `send` POSTs `{ "text": … }` (mrkdwn text, no `blocks`) to the webhook. Success is HTTP 200 with body `ok`.
+- **Escaping:** `&`, `<` and `>` are escaped in the title, the facts and the link URL ("Escaping text" in formatting-message-text.html). A `|` in the URL is percent-encoded. *Unverified:* how Slack renders an escaped `&` inside a link URL; the real test used a link without one.
 - Anything else is a failure. The HTTP status and the response body text are stored (masked) as `error`. The doc lists error names such as `no_service` or `team_disabled`; whether the body is exactly that name is *unverified*, which is why the raw text is stored. There is no retry classification (D-030, F9).
 
 ## Matching and dispatch
@@ -282,12 +284,12 @@ Both paths end in the same stored destination: `{ webhookUrl, channelLabel }`. D
 1. Ingest stores a new event with `notify = 1`.
 2. Match selects subscriptions where `category_id` is one of the event's categories (`event_categories`) and `created_at <= event.ingested_at`, and the user has a destination for that channel.
 3. For each one, it runs `INSERT OR IGNORE` into `deliveries` with status `pending`.
-4. Dispatch sends each newly inserted delivery through its channel module and sets status `sent` or `failed`, recording `error`. A `send` that **throws** counts as `failed`, with the exception message (masked) as the error (F8).
+4. Dispatch sends each newly inserted delivery through its channel module and sets status `sent` or `failed`, recording `error`. A `send` that **throws** counts as `failed`, with the exception message (masked) as the error (F8). A delivery whose destination was removed after matching, or whose stored config is not valid JSON, is also marked `failed`, never left `pending` (M9, R-033).
 5. SSE notifies both views.
 
-A user with a subscription but no destination for that channel gets no delivery row. The user view shows "<channel label> not connected" next to that subscription.
+A user with a subscription but no destination for that channel gets no delivery row. The user view does not mark that subscription; the Channels panel shows the channel as "not connected" (corrected in M9, R-035).
 
-**Interrupted dispatch (F8):** at startup, any delivery still `pending` (the process stopped between insert and send) is set to `failed` with error "interrupted before send". It is not resent (D-030), but it is visible in the admin view.
+**Interrupted dispatch (F8):** at startup, any delivery still `pending` (the process stopped before or during the send, e.g. Ctrl+C) is set to `failed` with error "interrupted: outcome unknown, it may have been delivered". The process may have stopped after Slack or SMTP received the message, so `failed` here does not mean it was never sent (corrected in M9, R-035). It is not resent (D-030), but it is visible in the admin view.
 
 ### Retries
 **Decided (D-030):** no retries, not even one immediate retry. A failure is recorded with its error text and is visible in the admin view. There is no `retryable` flag (F9): without retries nothing would read it.

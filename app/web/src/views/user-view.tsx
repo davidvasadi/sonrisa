@@ -6,13 +6,34 @@ import { EventList } from '@/components/panels/event-list';
 import { Section } from '@/components/panels/section';
 import { useLiveJson } from '@/live';
 
-// Result of the Slack OAuth round trip, passed back in the hash: #/?slack=connected|cancelled|error:...
-function useConnectResult(): string | null {
-  const [result] = useState(() => new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('slack'));
+// Result of a channel's connect flow (e.g. Slack OAuth), passed back in the hash:
+// #/?connect=<channel id>&result=connected|cancelled|error:... Only fixed messages are shown:
+// the channel must be a registered one (its label comes from /api/channels), and no text from
+// the URL is displayed, so a crafted link can't put its own words in the banner (D-001, R-035).
+function useConnectResult(): { channel: string; result: string } | null {
+  const [value] = useState(() => {
+    const q = new URLSearchParams(window.location.hash.split('?')[1] ?? '');
+    const channel = q.get('connect');
+    const result = q.get('result');
+    return channel && result ? { channel, result } : null;
+  });
   useEffect(() => {
-    if (result) history.replaceState(null, '', '#/');
-  }, [result]);
-  return result;
+    if (value) history.replaceState(null, '', '#/');
+  }, [value]);
+  return value;
+}
+
+function ConnectResult({ channel, result }: { channel: string; result: string }) {
+  const { data: channels } = useLiveJson<ChannelInfo[]>('/api/channels');
+  const label = channels?.find((c) => c.id === channel)?.label;
+  if (!label) return null; // unknown channel, or not loaded yet: show nothing
+  const ok = result === 'connected';
+  const text = ok ? `${label} connected.` : result === 'cancelled' ? `${label} was not connected.` : `${label} connection failed.`;
+  return (
+    <p role="status" className={`rounded-md border p-3 text-sm ${ok ? 'border-green-600' : 'border-destructive'}`}>
+      {text}
+    </p>
+  );
 }
 
 export function UserView({ user }: { user: User | null }) {
@@ -20,11 +41,7 @@ export function UserView({ user }: { user: User | null }) {
   if (!user) return <p className="text-muted-foreground">Pick a demo user in the sidebar.</p>;
   return (
     <div className="space-y-4">
-      {connectResult && (
-        <p role="status" className={`rounded-md border p-3 text-sm ${connectResult === 'connected' ? 'border-green-600' : 'border-destructive'}`}>
-          {connectResult === 'connected' ? 'Slack connected.' : connectResult === 'cancelled' ? 'Slack was not connected.' : `Slack connection failed (${connectResult}).`}
-        </p>
-      )}
+      {connectResult && <ConnectResult {...connectResult} />}
       <Subscriptions userId={user.id} />
       <Channels userId={user.id} />
       <Feed userId={user.id} />
@@ -75,7 +92,9 @@ function Subscriptions({ userId }: { userId: number }) {
     }
   }
 
-  if (!sources || !channels) return <LoadState title="My alerts" error={e1 ?? e2 ?? e3} />;
+  // Never show the grid before the saved subscriptions are loaded: Save replaces the whole set,
+  // so an empty grid saved by mistake would delete them all.
+  if (!sources || !channels || !saved) return <LoadState title="My alerts" error={e1 ?? e2 ?? e3} />;
   return (
     <Section title="My alerts" hint="Pick categories and the channels that deliver each one. Only events from now on are sent (D-027).">
       <div className="space-y-4">
@@ -153,9 +172,13 @@ function ChannelForm({ userId, channel, destination, onChange }: { userId: numbe
     }
   }
   async function remove() {
-    await sendJson('DELETE', url);
-    setMessage('Removed.');
-    onChange();
+    try {
+      await sendJson('DELETE', url);
+      setMessage('Removed.');
+      onChange();
+    } catch (e) {
+      setMessage((e as Error).message);
+    }
   }
 
   const connect = channel.status.connect;

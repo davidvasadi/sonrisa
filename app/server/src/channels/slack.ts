@@ -50,8 +50,10 @@ const escapeSlack = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;'
 
 export function render(e: DeliveryEvent): string {
   const title = escapeSlack(`${prefix(e)}${e.title}`);
-  // In <url|text> a "|" or ">" in the URL would end the link early, so encode them.
-  const head = e.link ? `*<${e.link.replace(/\|/g, '%7C').replace(/>/g, '%3E')}|${title}>*` : `*${title}*`;
+  // The URL is text too: & < > are escaped like everywhere else ("Escaping text"), and a "|"
+  // would end the URL early, so it is percent-encoded. Unverified: how Slack renders an escaped
+  // & in a link URL (the real test used a link without one).
+  const head = e.link ? `*<${escapeSlack(e.link).replace(/\|/g, '%7C')}|${title}>*` : `*${title}*`;
   return [head, ...facts(e).map(escapeSlack)].join('\n');
 }
 
@@ -80,6 +82,7 @@ export type SlackOAuthDeps = {
   db: Db;
   save: (userId: number, config: ChannelConfig, label: string | null) => void;
   exchange?: OAuthExchange;
+  log?: (msg: string) => void;
 };
 
 const STATE_TTL_MS = 10 * 60_000;
@@ -90,14 +93,17 @@ function oauthConfig(env: NodeJS.ProcessEnv) {
 }
 
 function oauthRoutes(router: Router, env: NodeJS.ProcessEnv, deps: SlackOAuthDeps) {
-  const { db, save, exchange = realExchange } = deps;
+  const { db, save, exchange = realExchange, log = console.log } = deps;
   db.exec('CREATE TABLE IF NOT EXISTS oauth_states (state TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created_at INTEGER NOT NULL)');
 
   // After the callback, send the browser back to the app's user view on the same origin as the redirect URI.
+  // The hash names the channel, so the UI can show the result for any channel with a connect flow (D-001).
+  // The UI shows only a fixed message, so an error's detail (Slack's error name) is logged here.
   const back = (result: string) => {
+    if (result.startsWith('error:')) log(`slack oauth: ${result}`);
     const cfg = oauthConfig(env);
     const origin = cfg ? new URL(cfg.redirectUri).origin : '';
-    return `${origin}/#/?slack=${encodeURIComponent(result)}`;
+    return `${origin}/#/?connect=slack&result=${encodeURIComponent(result)}`;
   };
 
   router.get('/api/slack/oauth/start', (req, res) => {
@@ -139,7 +145,9 @@ function oauthRoutes(router: Router, env: NodeJS.ProcessEnv, deps: SlackOAuthDep
       if (!v.ok) return void res.redirect(302, back('error:webhook_host'));
       save(row.userId, { webhookUrl: v.url }, r.incoming_webhook?.channel ?? null);
       res.redirect(302, back('connected'));
-    } catch {
+    } catch (e) {
+      // Only the message: the request held the client secret, the response may hold a token (design F14).
+      log(`slack oauth: code exchange failed: ${(e as Error).message.slice(0, 200)}`);
       res.redirect(302, back('error:exchange_failed'));
     }
   });

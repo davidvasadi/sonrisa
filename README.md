@@ -25,7 +25,7 @@ The implementation: `app/server` (Node + TypeScript, Express, SQLite) and `app/w
 
 ### Run it
 
-Requires **Node 22.12 or newer** ([D-032](process/05-decisions/decision-log.md#d-032-node-22-lts)). With nvm, `nvm use` picks it up from [.nvmrc](.nvmrc).
+Requires **Node 22.12 or newer** ([D-032](process/05-decisions/decision-log.md#d-032-node-22-lts)). With nvm, `nvm use` picks it up from [.nvmrc](.nvmrc). On an older Node, `npm install` stops with `EBADENGINE` ([.npmrc](.npmrc) sets `engine-strict`), and the server refuses to start with a message saying which version it needs ([D-034](process/05-decisions/decision-log.md#d-034-enforce-node-22-at-install-and-start)).
 
 ```sh
 npm install
@@ -35,7 +35,7 @@ npm test
 
 `npm install` may also need Python 3 and `make`: npm runs a `node-gyp` step for `better-sqlite3`. It compiles nothing, because a prebuilt binary is bundled, but node-gyp itself needs those tools ([R-016](process/06-ai-review/ai-review-log.md#r-016-better-sqlite3-13-still-runs-node-gyp)). macOS gets them with the Xcode Command Line Tools.
 
-No keys, no Docker, no `.env` needed (D-009). Everything in [.env.example](.env.example) is optional: SMTP and the Slack app switch on when set. The SQLite database is created at `app/server/data/sonrisa.db` (git-ignored); delete it to start fresh.
+No keys, no Docker, no `.env` needed (D-009). Only a repo-root `.env` is supported (not `.env.local` or `.env.development`: the web dev server would read those, the API would not). Everything in [.env.example](.env.example) is optional: SMTP and the Slack app switch on when set. The SQLite database is created at `app/server/data/sonrisa.db` (git-ignored); delete it to start fresh.
 
 ### Connect Slack (optional)
 
@@ -59,6 +59,7 @@ The admin layout and UI components come from [satnaing/shadcn-admin](https://git
 
 ## Known gaps (decided)
 
+- **Pasted Slack webhooks are tested only with a mock.** The real Slack test used Connect Slack (OAuth). The paste path shares its delivery code but was not tried against a real workspace ([D-023](process/05-decisions/decision-log.md#d-023-slack-delivery-tested-with-a-mock-receiver-then-once-for-real)).
 - **Real SMTP is unverified.** Email over SMTP is built from nodemailer's documentation and tested only with a fake transport; it has never sent through a real mail server. Without SMTP settings, email goes to the dev outbox in the admin view, which is the tested path.
 
 - **No price alerts.** "Market movements" are covered by the BBC Business news section, not by price feeds or % thresholds. Keyless price APIs exist, but they publish prices, not events ([D-024](process/05-decisions/decision-log.md#d-024-market-movements-via-bbc-business-no-price-feeds)).

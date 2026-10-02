@@ -22,8 +22,10 @@ const exchanges: Record<string, string>[] = [];
 let answer: unknown = {};
 const exchange: OAuthExchange = async (form) => {
   exchanges.push(form);
+  if (answer instanceof Error) throw answer;
   return answer;
 };
+const oauthLogs: string[] = [];
 
 function start(env: NodeJS.ProcessEnv) {
   const db = freshDb();
@@ -33,6 +35,7 @@ function start(env: NodeJS.ProcessEnv) {
     db,
     save: (userId, config, label) => saveDestination(db, userId, 'slack', config, label),
     exchange,
+    log: (m) => oauthLogs.push(m),
   });
   const server = createApp(db, { sources: [gdacs], channels: [createEmailChannel(db, {}, null), slack, createLogChannel(() => {})] }).listen(0);
   return { db, server, base: () => `http://localhost:${(server.address() as AddressInfo).port}` };
@@ -91,7 +94,7 @@ describe('Connect Slack: OAuth flow (stored Slack docs)', () => {
     };
     exchanges.length = 0;
     const r = await get(app.base(), `/api/slack/oauth/callback?code=abc&state=${state}`);
-    expect(r.headers.get('location')).toBe('https://localhost:5173/#/?slack=connected');
+    expect(r.headers.get('location')).toBe('https://localhost:5173/#/?connect=slack&result=connected');
     expect(exchanges).toEqual([{ code: 'abc', client_id: '111.222', client_secret: 'not-a-real-secret', redirect_uri: ENV.SLACK_REDIRECT_URI }]);
     const dest = app.db.prepare("SELECT config, label FROM destinations WHERE user_id = 2 AND channel = 'slack'").get() as { config: string; label: string };
     expect(dest).toEqual({ config: '{"webhookUrl":"https://hooks.slack.com/services/TEST/BTEST/fromOAuth"}', label: '#alerts' });
@@ -105,13 +108,13 @@ describe('Connect Slack: OAuth flow (stored Slack docs)', () => {
     answer = { ok: true, incoming_webhook: { url: 'https://hooks.slack.com/services/TEST/BTEST/x' } };
     await get(app.base(), `/api/slack/oauth/callback?code=abc&state=${state}`);
     const again = await get(app.base(), `/api/slack/oauth/callback?code=abc&state=${state}`);
-    expect(again.headers.get('location')).toBe('https://localhost:5173/#/?slack=error%3Astate');
+    expect(again.headers.get('location')).toBe('https://localhost:5173/#/?connect=slack&result=error%3Astate');
   });
 
   it('an unknown state is refused without calling Slack (forgery)', async () => {
     exchanges.length = 0;
     const r = await get(app.base(), '/api/slack/oauth/callback?code=abc&state=forged');
-    expect(r.headers.get('location')).toMatch(/slack=error%3Astate$/);
+    expect(r.headers.get('location')).toMatch(/connect=slack&result=error%3Astate$/);
     expect(exchanges).toEqual([]);
   });
 
@@ -119,27 +122,40 @@ describe('Connect Slack: OAuth flow (stored Slack docs)', () => {
     const state = await beginOAuth();
     app.db.prepare('UPDATE oauth_states SET created_at = ? WHERE state = ?').run(Date.now() - 11 * 60_000, state);
     const r = await get(app.base(), `/api/slack/oauth/callback?code=abc&state=${state}`);
-    expect(r.headers.get('location')).toMatch(/slack=error%3Astate$/);
+    expect(r.headers.get('location')).toMatch(/connect=slack&result=error%3Astate$/);
   });
 
   it('no code (e.g. the user declined; exact Slack parameters unverified) means not connected', async () => {
     const state = await beginOAuth();
     const r = await get(app.base(), `/api/slack/oauth/callback?error=access_denied&state=${state}`);
-    expect(r.headers.get('location')).toMatch(/slack=cancelled$/);
+    expect(r.headers.get('location')).toMatch(/connect=slack&result=cancelled$/);
   });
 
   it('ok: false from Slack is reported with Slack’s error name only', async () => {
     const state = await beginOAuth();
     answer = { ok: false, error: 'invalid_code' };
+    oauthLogs.length = 0;
     const r = await get(app.base(), `/api/slack/oauth/callback?code=old&state=${state}`);
-    expect(r.headers.get('location')).toMatch(/slack=error%3Ainvalid_code$/);
+    // The UI shows only a fixed "connection failed"; the detail is in the server log.
+    expect(oauthLogs).toEqual(['slack oauth: error:invalid_code']);
+    expect(r.headers.get('location')).toMatch(/connect=slack&result=error%3Ainvalid_code$/);
+  });
+
+  it('an exchange that throws is logged (message only, no secret) and reported as exchange_failed', async () => {
+    const state = await beginOAuth();
+    answer = new Error('Unexpected token \'<\', "<html>" is not valid JSON');
+    oauthLogs.length = 0;
+    const r = await get(app.base(), `/api/slack/oauth/callback?code=abc&state=${state}`);
+    expect(r.headers.get('location')).toMatch(/connect=slack&result=error%3Aexchange_failed$/);
+    expect(oauthLogs).toEqual(['slack oauth: code exchange failed: Unexpected token \'<\', "<html>" is not valid JSON', 'slack oauth: error:exchange_failed']);
+    expect(oauthLogs.join()).not.toContain(ENV.SLACK_CLIENT_SECRET);
   });
 
   it('a webhook URL from Slack that is not hooks.slack.com is rejected (D-022 applies to OAuth)', async () => {
     const state = await beginOAuth(3);
     answer = { ok: true, incoming_webhook: { url: 'https://hooks.slack.com.evil.test/services/X' } };
     const r = await get(app.base(), `/api/slack/oauth/callback?code=abc&state=${state}`);
-    expect(r.headers.get('location')).toMatch(/slack=error%3Awebhook_host$/);
+    expect(r.headers.get('location')).toMatch(/connect=slack&result=error%3Awebhook_host$/);
     expect(app.db.prepare("SELECT 1 FROM destinations WHERE user_id = 3 AND channel = 'slack'").get()).toBeUndefined();
   });
 });

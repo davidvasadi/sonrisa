@@ -98,6 +98,41 @@ describe('usgs: ingest', () => {
     expect(r.baselineEventIds).toHaveLength(8);
   });
 
+  // A shape change: properties.ids is null, so normalise throws for every item.
+  const broken = () => items().map((f) => ({ ...(f as object), properties: { ...(f as { properties: object }).properties, ids: null } }));
+
+  it('a feed whose every item fails to normalise is a failed feed: error shown, not baselined', () => {
+    const db = setup();
+    const r = ingestPoll(db, usgs, [{ feedKey: feed, ok: true, items: broken() }], '2026-10-02T14:00:00.000Z');
+    expect(r.feedsFailed).toBe(1);
+    expect(r.itemErrors).toHaveLength(8);
+    const row = db.prepare('SELECT baselined_at, last_success_at, last_error FROM feeds').get() as Record<string, string | null>;
+    expect(row.baselined_at).toBeNull();
+    expect(row.last_success_at).toBeNull();
+    expect(row.last_error).toMatch(/^8 of 8 items failed to normalise: /);
+  });
+
+  it('after an all-failed first poll, the first good poll is still a baseline: nobody is flooded', () => {
+    const db = setup();
+    ingestPoll(db, usgs, [{ feedKey: feed, ok: true, items: broken() }], '2026-10-02T14:00:00.000Z');
+    const r = ingestPoll(db, usgs, [{ feedKey: feed, ok: true, items: items() }], '2026-10-02T14:02:00.000Z');
+    expect(r.newEventIds).toEqual([]);
+    expect(r.baselineEventIds).toHaveLength(8);
+    expect(db.prepare('SELECT last_error FROM feeds').get()).toEqual({ last_error: null });
+  });
+
+  it('some failed items: the feed counts as fetched and baselined, and the error is shown', () => {
+    const db = setup();
+    const mixed = [...items().slice(0, 6), ...broken().slice(6)];
+    const r = ingestPoll(db, usgs, [{ feedKey: feed, ok: true, items: mixed }], '2026-10-02T14:00:00.000Z');
+    expect(r.feedsOk).toBe(1);
+    expect(r.baselineEventIds).toHaveLength(6);
+    const row = db.prepare('SELECT baselined_at, last_success_at, last_error FROM feeds').get() as Record<string, string | null>;
+    expect(row.baselined_at).toBe('2026-10-02T14:00:00.000Z');
+    expect(row.last_success_at).toBe('2026-10-02T14:00:00.000Z');
+    expect(row.last_error).toMatch(/^2 of 8 items failed to normalise: /);
+  });
+
   it('pollSource fetches the feed URL and ingests it', async () => {
     const db = setup();
     const urls: string[] = [];

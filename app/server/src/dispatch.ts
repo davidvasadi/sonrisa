@@ -47,31 +47,49 @@ function scrub(text: string, channel: Channel, config: ChannelConfig): string {
 // Dispatch: sends each delivery through its channel. Each one is isolated: a failing or
 // throwing channel marks only its own delivery failed (design F8). No retries (D-030).
 export async function dispatch(db: Db, channels: Channel[], deliveryIds: number[]): Promise<DeliveryResult[]> {
+  // LEFT JOIN: a destination removed since matching still gives a row, so the delivery is
+  // marked failed instead of staying pending.
   const get = db.prepare(
     `SELECT dl.id, dl.event_id AS eventId, dl.user_id AS userId, dl.channel, d.config
-     FROM deliveries dl JOIN destinations d ON d.user_id = dl.user_id AND d.channel = dl.channel
+     FROM deliveries dl LEFT JOIN destinations d ON d.user_id = dl.user_id AND d.channel = dl.channel
      WHERE dl.id = ? AND dl.status = 'pending'`,
   );
   const done = db.prepare('UPDATE deliveries SET status = ?, error = ?, sent_at = ? WHERE id = ?');
   const results: DeliveryResult[] = [];
   for (const id of deliveryIds) {
-    const row = get.get(id) as { id: number; eventId: number; userId: number; channel: string; config: string } | undefined;
-    if (!row) continue;
+    const row = get.get(id) as { id: number; eventId: number; userId: number; channel: string; config: string | null } | undefined;
+    if (!row) continue; // not pending any more: already sent or failed, nothing to do
     const channel = channels.find((c) => c.id === row.channel);
-    const config = JSON.parse(row.config) as ChannelConfig;
+    let config: ChannelConfig | null = null;
     let error: string | null = null;
     try {
-      const event = loadDeliveryEvent(db, row.eventId);
-      if (!channel) error = `channel "${row.channel}" is not registered`;
-      else if (!event) error = `event ${row.eventId} not found`;
-      else {
-        const r = await channel.send(config, event);
-        if (!r.ok) error = r.error;
-      }
-    } catch (e) {
-      error = `send threw: ${(e as Error).message}`;
+      config = row.config === null ? null : (JSON.parse(row.config) as ChannelConfig);
+    } catch {
+      error = 'destination config is not valid JSON'; // the text is never stored: it may hold a secret
     }
-    if (error && channel) error = scrub(error, channel, config);
+    if (!error) {
+      try {
+        const event = loadDeliveryEvent(db, row.eventId);
+        if (!channel) error = `channel "${row.channel}" is not registered`;
+        else if (!config) error = 'destination removed before send';
+        else if (!event) error = `event ${row.eventId} not found`;
+        else {
+          const r = await channel.send(config, event);
+          if (!r.ok) error = r.error;
+        }
+      } catch (e) {
+        error = `send threw: ${(e as Error).message}`;
+      }
+    }
+    if (error && channel && config) {
+      try {
+        error = scrub(error, channel, config);
+      } catch {
+        // mask() can throw on a malformed config (e.g. a number where a URL belongs). Never store
+        // the unmasked text, and never let one delivery stop the rest.
+        error = 'error text hidden: it could not be masked';
+      }
+    }
     const status = error ? 'failed' : 'sent';
     done.run(status, error, error ? null : now(), row.id);
     results.push({ id: row.id, userId: row.userId, channel: row.channel, status, error });
@@ -84,10 +102,11 @@ export async function deliver(db: Db, channels: Channel[], eventIds: number[]): 
   return dispatch(db, channels, match(db, eventIds, channels.map((c) => c.id)));
 }
 
-// At startup: a delivery still pending was interrupted between insert and send (design F8).
-// It is not resent (D-030), but it becomes visible as failed.
+// At startup: a delivery still pending was interrupted (design F8). The process may have stopped
+// before the send or during it, after Slack or SMTP received the message, so the outcome is unknown.
+// It is not resent (D-030), but it becomes visible as failed, with an error that says so.
 export function failInterrupted(db: Db): number {
   return db
-    .prepare("UPDATE deliveries SET status = 'failed', error = 'interrupted before send' WHERE status = 'pending'")
+    .prepare("UPDATE deliveries SET status = 'failed', error = 'interrupted: outcome unknown, it may have been delivered' WHERE status = 'pending'")
     .run().changes;
 }
