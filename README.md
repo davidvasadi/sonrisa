@@ -17,7 +17,7 @@ Plans, research, design, decisions, AI review and prompt history. Start here.
 7. [Prompts](process/07-prompts/session-log.md) — session log, [transcripts](process/07-prompts/transcripts/), [drafts](process/07-prompts/drafts/)
 8. [Screenshots](process/08-screenshots/)
 
-Also: [notes](process/notes/) and [scripts](process/scripts/).
+Also: [notes](process/notes/) and [scripts](process/scripts/). Rules given to the AI for this repo: [CLAUDE.md](CLAUDE.md).
 
 ## [app/](app/) — the system
 

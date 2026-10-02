@@ -97,3 +97,21 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-009-priorities.md](transcripts/P-009-priorities.md).
 - Result summary: Plan gets must / should / cut-first tiers, a stub log channel as a must-have, M9 independent review, M10 submission. Decisions D-019 (stub channel) and D-020 (priorities) logged.
 - Follow-up: D-019, D-020
+
+## P-010: Code-reviewer agent and SMTP
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Answer the AI's two open points from P-009.
+- Prompt: Verbatim in [transcripts/P-010-reviewer-and-smtp.md](transcripts/P-010-reviewer-and-smtp.md).
+- Result summary: No change to the plan. The AI had flagged that no "code-reviewer" agent exists; the author plans to create it in a later step, before M9. SMTP stays optional.
+- Follow-up: create the code-reviewer agent before M9
+
+## P-011: CLAUDE.md rules
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Set standing rules for the AI before M3, so verification and decision discipline don't depend on repeating them in each prompt.
+- Prompt: Verbatim in [transcripts/P-011-claude-md.md](transcripts/P-011-claude-md.md).
+- Result summary: [CLAUDE.md](../../CLAUDE.md) written with the author's rules. The AI added one section not in the prompt, "Process logging", describing the logging conventions already in use.
+- Follow-up: `/milestone-done` is referenced but does not exist yet
