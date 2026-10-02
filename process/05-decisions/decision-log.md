@@ -33,7 +33,7 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
   2. Channels configurable at runtime with no deploy.
 - Decision: A channel is a delivery mechanism (Email, Slack), not a topic. A new channel (SMS, Teams, ...) is one new module, with no change to the core.
 - Why: Author: new channels must be easy to add later.
-- AI involvement: The AI proposed the same thing in brief-analysis A10, and suggested adding a stub third channel to prove the claim. Whether to build that stub is not yet decided.
+- AI involvement: The AI proposed the same thing in brief-analysis A10, and suggested adding a stub third channel to prove the claim. Building the stub was decided in [D-019](#d-019-build-a-stub-log-channel).
 - Consequences / trade-offs: The core (matching, dedup, scheduling) must not reference specific channels. Adding a channel needs a code change and a deploy, and that is accepted.
 
 ## D-002: Three fixed topics, on/off per user
@@ -221,3 +221,26 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 - Why: Author decision. *AI note:* this delegates the definition of "important" to the source's own editorial judgement (e.g. a curated alert feed instead of a raw one). That makes it explicit and inspectable, and removes thresholds the system would have had to justify.
 - AI involvement: Rejects the severity floor the AI proposed in its reply to [P-006](../07-prompts/session-log.md#p-006-decision-revisions) (Q1). Rejected in [P-007](../07-prompts/session-log.md#p-007-close-q1).
 - Consequences / trade-offs: Source selection becomes the main quality lever. Research must measure each category's volume from real responses, not just confirm the category exists. Sources that only offer an unfiltered firehose are ruled out. Users cannot tune volume except by unsubscribing from a category.
+
+## D-019: Build a stub log channel
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: D-001 claims a new channel is one module with no core changes. The AI suggested proving this with a stub third channel. The plan had only stated the claim as a done-when criterion.
+- Decision: Build a tiny third channel that only logs the message. It is a must-have.
+- Why: Author decision. The brief asks for channels that are easy to add, and a working third channel shows this better than an argument does.
+- AI involvement: Proposed by the AI (brief-analysis risk 6, plan review in P-008).
+- Consequences / trade-offs: The stub must be added the same way a real channel would be, so the claim holds. If it needs a core change, that is a finding to log.
+
+## D-020: Priorities follow the task, not effort
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The first plan (P-008) set the cut order by effort and optionality.
+- Decision: Three tiers, set out in the [plan](../02-plan/plan.md#priorities).
+  - **Must have:** the process record, plus everything the brief literally asks for (category alerts; Email and Slack delivery, with a webhook being enough; easy-to-add channels with a stub; an admin view), plus deduplication and starting with no keys.
+  - **Should have:** live updates, source freshness, more than one source.
+  - **Cut first:** Slack OAuth, push ingestion, UI polish, markets.
+- Why: Author: the evaluation weighs the process most, and the brief's literal asks define "done". Dedup and no-keys are must-haves because without them the app doesn't work or can't be run.
+- AI involvement: Replaces the AI's effort-based cut order from P-008. Slack OAuth (D-007) and markets (D-016) are now explicitly expendable. Live updates (D-004) and source freshness (D-014) remain in scope but can be dropped if time runs out.
+- Consequences / trade-offs: An independent code review (M9) is added before submission. The author decides what gets fixed.

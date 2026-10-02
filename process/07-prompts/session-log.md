@@ -88,3 +88,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-008-plan.md](transcripts/P-008-plan.md).
 - Result summary: [plan.md](../02-plan/plan.md) with 6 deliverables, ordering rationale (sources → design → vertical slice → optional paths), cut order, M1–M9 with "done when"; M1–M2 marked done.
 - Follow-up: none
+
+## P-009: Priorities and review milestone
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Set priorities by what the task evaluates and the brief asks for; add an independent code review milestone.
+- Prompt: Verbatim in [transcripts/P-009-priorities.md](transcripts/P-009-priorities.md).
+- Result summary: Plan gets must / should / cut-first tiers, a stub log channel as a must-have, M9 independent review, M10 submission. Decisions D-019 (stub channel) and D-020 (priorities) logged.
+- Follow-up: D-019, D-020
