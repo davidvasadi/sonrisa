@@ -80,6 +80,9 @@ rejected stooq-404.html https://stooq.com/q/l/?s=^spx&f=sd2t2ohlcv&h&e=csv
 rejected nws-alerts-active.geojson https://api.weather.gov/alerts/active
 slack-docs installing-with-oauth.html https://docs.slack.dev/authentication/installing-with-oauth/
 slack-docs incoming-webhooks.html https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/
+slack-docs formatting-message-text.html https://docs.slack.dev/messaging/formatting-message-text/
+nodemailer-docs smtp.html https://nodemailer.com/smtp
+nodemailer-docs message.html https://nodemailer.com/message
 terms usgs-copyrights-and-credits.html https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
 terms usgs-geojson-feed-docs.html https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
 terms gdacs-term-of-use.html https://www.gdacs.org/About/termofuse.aspx

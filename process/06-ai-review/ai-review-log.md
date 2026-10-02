@@ -336,3 +336,64 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: corrected (the check was re-run correctly)
 - What changed as a result: Every later database check runs after `nvm use`. Root `engines` already says `>=22.12.0`. *Not done:* a runtime guard that exits with a clear message on Node < 22. That would be cheap; it is for the author to decide.
 - Related decision: D-032
+
+## R-023: M7 mutation checks and the redirect gap
+
+- Date: 2026-10-02
+- Prompt / session: [P-027](../07-prompts/session-log.md#p-027-close-m6-start-m7)
+- What the AI produced: The M7 matching and delivery code, plus 25 delivery tests that all passed on their first run.
+- How I checked it: A first run that passes everything is no evidence by itself, so the AI broke each guarantee in turn, ran the suite and restored the code. It also re-read what each Slack test actually exercised.
+- What I found:
+  - **All 9 mutations were caught:**
+    - forward-only cut-off removed;
+    - notify flag ignored;
+    - delivery unique key removed;
+    - no isolation (a throw escapes dispatch);
+    - host check by substring;
+    - no re-check before send;
+    - real transport follows redirects;
+    - demo keeps real IDs;
+    - email HTML not escaped.
+  - **One gap, found before the mutation run.** The redirect test used the *test* transport, which itself sets `redirect: 'manual'`. So it proved the channel fails a 3xx, but not that the *real* transport refuses to follow one.
+- Verdict: corrected
+- What changed as a result:
+  - The real transport is exported and tested directly against the mock receiver. The mock's redirect target (`169.254.169.254`) is shown never to be requested, and the "follows redirects" mutation fails that test.
+  - Also cleaned up: a convoluted assertion now uses a plain event ID.
+- Related decision: D-005, D-022, D-027, D-030
+
+## R-024: nodemailer doc URLs returned 404
+
+- Date: 2026-10-02
+- Prompt / session: [P-027](../07-prompts/session-log.md#p-027-close-m6-start-m7)
+- What the AI produced: Fetch-script entries for `https://nodemailer.com/smtp/` and `/message/`, URLs written from memory.
+- How I checked it: The fetch script records the HTTP status of every saved file.
+- What I found: Both returned **404**; the site has moved its pages. The real paths, read from the homepage links, are `/smtp` and `/message` with no trailing slash. The 404 bodies were deleted and the pages re-fetched (200).
+- Verdict: corrected
+- What changed as a result: The SMTP options (`host`, `port` defaulting to 587 or 465 if `secure`, `secure`, `auth`) and message fields (`from`, `to`, `subject`, `text`, `html`) now come from the stored pages, as CLAUDE.md requires for things that can't be called without credentials. A real SMTP send remains *unverified*, and the README says so.
+- Related decision: D-010
+
+## R-025: Real Slack error body is the error name
+
+- Date: 2026-10-02
+- Prompt / session: [P-027](../07-prompts/session-log.md#p-027-close-m6-start-m7)
+- What the AI produced: The design marked as *unverified* whether a failed webhook's response body is exactly Slack's error name (design F9), so the code stores the raw text.
+- How I checked it: In the real run, a delivery to Slack's own documentation placeholder webhook (`T00000000/B00000000/X…`) on the real `hooks.slack.com`. The response was then saved with its headers in [slack-webhook/](../03-research/raw-responses/slack-webhook/).
+- What I found: `HTTP 404` with body `no_team`, the bare error name from the doc's list. The other channels in the same inject were sent, and the full URL never appeared in the API or the log.
+- Verdict: accepted
+- What changed as a result: This is one real data point for the error format; other errors are still unverified. A successful real post is still to be shown in the author's M8 test (D-023).
+- Related decision: D-022, D-023
+
+## R-026: Demo content did not match the chosen category
+
+- Date: 2026-10-02
+- Prompt / session: found in [P-027](../07-prompts/session-log.md#p-027-close-m6-start-m7), fixed in [P-028](../07-prompts/session-log.md#p-028-close-m7-start-m8)
+- What the AI produced: Demo inject with one stored item per source, relabelled with the chosen category.
+- How I checked it: Read the real-run output, not just the statuses.
+- What I found: Injecting GDACS "Tropical cyclones" delivered a drought story labelled "GDACS · Tropical cyclones". Every status was `sent`, but the demo would mislead whoever watched it.
+- Verdict: corrected
+- What changed as a result:
+  - GDACS demo data holds the first real item of each of the six event types from the stored response.
+  - Inject picks the item for the chosen category.
+  - A test checks every type's raw `eventtype`.
+  - BBC and UN News still use one item, relabelled with the chosen section. Not fixed: the author asked for GDACS only.
+- Related decision: D-017

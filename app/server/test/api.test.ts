@@ -15,7 +15,7 @@ beforeAll(async () => {
   seed(db);
   registerSource(db, gdacs);
   ingestPoll(db, gdacs, [{ feedKey: 'eventlist', ok: false, error: 'HTTP 503' }], '2026-10-02T14:00:00.000Z');
-  server = createApp(db).listen(0);
+  server = createApp(db).listen(0); // no channels: the M5/M6 routes
   await new Promise((resolve) => server.once('listening', resolve));
   base = `http://localhost:${(server.address() as AddressInfo).port}`;
 });

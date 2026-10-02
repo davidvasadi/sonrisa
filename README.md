@@ -45,5 +45,7 @@ The admin layout and UI components come from [satnaing/shadcn-admin](https://git
 
 ## Known gaps (decided)
 
+- **Real SMTP is unverified.** Email over SMTP is built from nodemailer's documentation and tested only with a fake transport; it has never sent through a real mail server. Without SMTP settings, email goes to the dev outbox in the admin view, which is the tested path.
+
 - **No price alerts.** "Market movements" are covered by the BBC Business news section, not by price feeds or % thresholds. Keyless price APIs exist, but they publish prices, not events ([D-024](process/05-decisions/decision-log.md#d-024-market-movements-via-bbc-business-no-price-feeds)).
 - **No GovSlack.** Pasted webhooks are accepted only on `hooks.slack.com`; GovSlack uses `slack-gov.com` ([D-022](process/05-decisions/decision-log.md#d-022-pasted-webhooks-only-to-hooksslackcom), [D-026](process/05-decisions/decision-log.md#d-026-govslack-not-supported)).

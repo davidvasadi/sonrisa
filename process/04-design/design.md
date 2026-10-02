@@ -159,7 +159,7 @@ deliveries   (id INTEGER PK, event_id INTEGER REFERENCES events, user_id INTEGER
               UNIQUE (event_id, user_id, channel))                   -- NOTIFICATION DEDUP (D-005)
 
 -- Owned by channel modules, not the core (F7). Each module creates its own table:
-outbox       (id INTEGER PK, delivery_id INTEGER REFERENCES deliveries,      -- email channel: dev outbox (D-010)
+outbox       (id INTEGER PK, event_id INTEGER,      -- email channel: dev outbox (D-010); event_id, since send() gets the event (M7)
               to_address TEXT, subject TEXT, text TEXT, html TEXT, created_at TEXT)
 
 oauth_states (state TEXT PK, user_id INTEGER, created_at TEXT)  -- slack channel: OAuth CSRF, 10 min
@@ -226,7 +226,7 @@ interface Channel {
 ```
 
 - **Formatting:** each channel renders its own messages: HTML and text email, Slack JSON. That is core scope under D-017.
-- **Registration:** channels are listed in `server/channels/index.ts`, one import plus one array entry each. That file belongs to the channels folder, not the core; matching, dispatch and the core API never name a channel.
+- **Registration:** channels are listed in `app/server/src/channels/index.ts`, one import plus one array entry each. That file belongs to the channels folder, not the core; matching, dispatch and the core API never name a channel.
 - **A channel can own its own table and admin panel (F7).** The email channel owns `outbox` and an "Outbox" panel in the admin view. The slack channel owns `oauth_states`. The module creates its own table at startup. The panel is a UI component next to the module's code, and the admin page lists it. Adding a channel that **needs** storage or a panel therefore means its own table plus one more panel entry on the admin page. That is an addition, not a change to matching, dispatch or the core tables, and no plugin system is built to avoid it. A channel like Discord (webhook only) needs neither.
 - **Not connected:** the user view shows "<channel label> not connected" for a subscription without a destination, using the channel's `label`.
 - **Decided (D-029):** a one-line registry entry is not a core change under D-001.
@@ -237,12 +237,12 @@ interface Channel {
 - **How it's added:** exactly the way Discord would be. If it needs anything beyond its own file and the registry line, that is a finding to log (D-019).
 
 ### What adding Discord would take
-1. **`server/channels/discord.ts`**, with:
+1. **`app/server/src/channels/discord.ts`**, with:
    - `fields: [{ name: 'webhookUrl', label: 'Discord webhook URL', secret: true }]`;
    - `validate`: HTTPS and an exact host match, like D-022;
    - `mask`;
    - `send`: POST JSON to the webhook.
-2. **One line** in `channels/index.ts`.
+2. **One line** in `app/server/src/channels/index.ts`.
 3. **Tests** for validate, mask and send, with an injected transport as for Slack.
 4. **Verification first:** Discord's webhook URL host, payload shape and error codes are all *unverified*. Per CLAUDE.md they come from Discord's official docs, cited, before any code is written.
 

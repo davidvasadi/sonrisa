@@ -1,0 +1,23 @@
+url: https://docs.slack.dev/messaging/formatting-message-text/
+fetched_at: 2026-10-02T15:05:02Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+content-length: 124329
+x-powered-by: Express
+vary: Accept, Accept-Encoding
+link: </messaging/formatting-message-text.md>; rel="alternate"; type="text/markdown"
+accept-ranges: bytes
+cache-control: public, max-age=0
+last-modified: Thu, 01 Oct 2026 19:30:41 GMT
+etag: W/"1e5a9-1a0f8f28ee8"
+date: Fri, 02 Oct 2026 15:05:02 GMT
+x-envoy-upstream-service-time: 1
+via: ingress-bedrock-iad-prod-07cd13d28d1cb5b1c, 1.1 aa5ce5406e93a054b1ef72da214287cc.cloudfront.net (CloudFront)
+server: envoy
+x-cache: Miss from cloudfront
+x-amz-cf-pop: BUD50-P2
+x-amz-cf-id: TB7Vc1weRFaQ8tESWHMRIpl1VIvOHWLWDE253lcUOpWe9xZsMoNjXQ==
+

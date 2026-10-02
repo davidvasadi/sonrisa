@@ -66,8 +66,8 @@ function group(entries: { event: NormalisedEvent; feedKey: string }[]): Group[] 
   return groups;
 }
 
-export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: string = now()): IngestReport {
-  const report: IngestReport = {
+function emptyReport(): IngestReport {
+  return {
     feedsOk: 0,
     feedsFailed: 0,
     items: 0,
@@ -77,6 +77,10 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
     knownEvents: 0,
     unknownCategories: [],
   };
+}
+
+export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: string = now()): IngestReport {
+  const report = emptyReport();
 
   // Which feeds were baselined before this poll (D-027: per feed, persisted).
   const baselined = new Set(
@@ -100,16 +104,7 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
     }
   }
 
-  const findKey = db.prepare('SELECT event_id FROM event_keys WHERE source_id = ? AND external_id = ?');
-  const insertKey = db.prepare('INSERT OR IGNORE INTO event_keys (source_id, external_id, event_id) VALUES (?, ?, ?)');
-  const insertEvent = db.prepare(
-    `INSERT INTO events (source_id, title, occurred_at, published_at, location_text, lat, lon, severity, link,
-                         is_forecast, is_demo, raw, ingested_at, notify)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
-  );
-  const findCategory = db.prepare('SELECT id FROM categories WHERE id = ?');
-  const insertCategory = db.prepare('INSERT INTO categories (id, source_id, key, label, declared) VALUES (?, ?, ?, ?, 0)');
-  const linkCategory = db.prepare('INSERT OR IGNORE INTO event_categories (event_id, category_id) VALUES (?, ?)');
+  const store = storeFor(db, source, report);
   const feedAttempt = db.prepare(
     'UPDATE feeds SET last_attempt_at = ?, last_success_at = ?, last_error = NULL WHERE source_id = ? AND feed_key = ?',
   );
@@ -117,16 +112,6 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
   const setBaselined = db.prepare(
     'UPDATE feeds SET baselined_at = ? WHERE source_id = ? AND feed_key = ? AND baselined_at IS NULL',
   );
-
-  const categoryId = (key: string) => {
-    const id = `${source.id}:${key}`;
-    if (!findCategory.get(id)) {
-      // A value the module didn't declare: store it under its raw code, never drop it.
-      insertCategory.run(id, source.id, key, key);
-      report.unknownCategories.push(key);
-    }
-    return id;
-  };
 
   db.transaction(() => {
     for (const r of results) {
@@ -140,36 +125,76 @@ export function ingestPoll(db: Db, source: Source, results: FeedResult[], at: st
     }
 
     for (const g of group(entries)) {
-      const known = g.ids
-        .map((id) => (findKey.get(source.id, id) as { event_id: number } | undefined)?.event_id)
-        .filter((id): id is number => id !== undefined);
-
-      if (known.length > 0) {
-        // Already stored (event dedup, D-005). Record new IDs and new categories, notify nobody (D-028).
-        const eventId = Math.min(...known);
-        for (const id of g.ids) insertKey.run(source.id, id, eventId);
-        for (const k of g.categoryKeys) linkCategory.run(eventId, categoryId(k));
-        report.knownEvents += 1;
-        continue;
-      }
-
-      // New to us. Notify only if it came from a feed that was already baselined (D-027).
-      const notify = [...g.feedKeys].some((k) => baselined.has(k));
-      const e = g.event;
-      const isForecast = e.occurredAt !== null && e.occurredAt > at;
-      const { lastInsertRowid } = insertEvent.run(
-        source.id, e.title, e.occurredAt, e.publishedAt, e.location.text, e.location.lat, e.location.lon,
-        e.severity, e.link, isForecast ? 1 : 0, JSON.stringify(e.raw), at, notify ? 1 : 0,
-      );
-      const eventId = Number(lastInsertRowid);
-      for (const id of g.ids) insertKey.run(source.id, id, eventId);
-      for (const k of g.categoryKeys) linkCategory.run(eventId, categoryId(k));
-      (notify ? report.newEventIds : report.baselineEventIds).push(eventId);
+      // New to us? Notify only if it came from a feed that was already baselined (D-027).
+      store(g, [...g.feedKeys].some((k) => baselined.has(k)), at, false);
     }
 
     // A feed's first successful fetch is its baseline (D-027). Failed feeds stay un-baselined.
     for (const r of results) if (r.ok) setBaselined.run(at, source.id, r.feedKey);
   })();
 
+  return report;
+}
+
+// Stores one group: dedup on any external ID (D-005), links every category (D-028).
+// Shared by polling and demo inject, so a demo event takes exactly the same path (D-017).
+function storeFor(db: Db, source: Source, report: IngestReport) {
+  const findKey = db.prepare('SELECT event_id FROM event_keys WHERE source_id = ? AND external_id = ?');
+  const insertKey = db.prepare('INSERT OR IGNORE INTO event_keys (source_id, external_id, event_id) VALUES (?, ?, ?)');
+  const insertEvent = db.prepare(
+    `INSERT INTO events (source_id, title, occurred_at, published_at, location_text, lat, lon, severity, link,
+                         is_forecast, is_demo, raw, ingested_at, notify)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const findCategory = db.prepare('SELECT id FROM categories WHERE id = ?');
+  const insertCategory = db.prepare('INSERT INTO categories (id, source_id, key, label, declared) VALUES (?, ?, ?, ?, 0)');
+  const linkCategory = db.prepare('INSERT OR IGNORE INTO event_categories (event_id, category_id) VALUES (?, ?)');
+
+  const categoryId = (key: string) => {
+    const id = `${source.id}:${key}`;
+    if (!findCategory.get(id)) {
+      // A value the module didn't declare: store it under its raw code, never drop it.
+      insertCategory.run(id, source.id, key, key);
+      report.unknownCategories.push(key);
+    }
+    return id;
+  };
+
+  return (g: Group, notify: boolean, at: string, isDemo: boolean): number => {
+    const known = g.ids
+      .map((id) => (findKey.get(source.id, id) as { event_id: number } | undefined)?.event_id)
+      .filter((id): id is number => id !== undefined);
+
+    if (known.length > 0) {
+      // Already stored. Record new IDs and new categories, notify nobody (D-028).
+      const eventId = Math.min(...known);
+      for (const id of g.ids) insertKey.run(source.id, id, eventId);
+      for (const k of g.categoryKeys) linkCategory.run(eventId, categoryId(k));
+      report.knownEvents += 1;
+      return eventId;
+    }
+
+    const e = g.event;
+    const isForecast = e.occurredAt !== null && e.occurredAt > at;
+    const { lastInsertRowid } = insertEvent.run(
+      source.id, e.title, e.occurredAt, e.publishedAt, e.location.text, e.location.lat, e.location.lon,
+      e.severity, e.link, isForecast ? 1 : 0, isDemo ? 1 : 0, JSON.stringify(e.raw), at, notify ? 1 : 0,
+    );
+    const eventId = Number(lastInsertRowid);
+    for (const id of g.ids) insertKey.run(source.id, id, eventId);
+    for (const k of g.categoryKeys) linkCategory.run(eventId, categoryId(k));
+    (notify ? report.newEventIds : report.baselineEventIds).push(eventId);
+    return eventId;
+  };
+}
+
+// A demo event (D-017): already normalised, stored with notify = 1 and is_demo = 1 by the
+// same store as polled events. Its one external ID is fresh, so it never collides (design F2).
+export function ingestDemo(db: Db, source: Source, event: NormalisedEvent, at: string = now()): IngestReport {
+  const report = emptyReport();
+  const store = storeFor(db, source, report);
+  db.transaction(() => {
+    store({ event, ids: event.externalIds, categoryKeys: new Set([event.categoryKey]), feedKeys: new Set() }, true, at, true);
+  })();
   return report;
 }

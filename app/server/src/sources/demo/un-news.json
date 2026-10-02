@@ -1,0 +1,9 @@
+{
+  "from": "process/03-research/raw-responses/un-news/topic-climate-change.rss, first item, as returned by parse()",
+  "item": {
+    "title": "From energy crisis to energy transition: How renewables are reshaping energy security",
+    "link": "https://news.un.org/feed/view/en/story/2026/09/1168473",
+    "guid": "https://news.un.org/en/story/2026/09/1168473",
+    "pubDate": "Mon, 28 Sep 2026 12:00:00 +0000"
+  }
+}

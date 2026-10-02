@@ -1,0 +1,28 @@
+url: https://nodemailer.com/smtp
+fetched_at: 2026-10-02T15:05:36Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: GitHub.com
+content-type: text/html; charset=utf-8
+last-modified: Sun, 06 Sep 2026 03:28:17 GMT
+access-control-allow-origin: *
+etag: "6a9cddd1-15157"
+expires: Fri, 02 Oct 2026 10:36:23 GMT
+cache-control: max-age=600
+x-proxy-cache: MISS
+x-github-request-id: F1F0:306B4:436E5F:43A489:6ABF86CE
+x-github-edge-region: fra
+accept-ranges: bytes
+age: 0
+date: Fri, 02 Oct 2026 15:05:36 GMT
+via: 1.1 varnish
+x-served-by: cache-vie6335-VIE
+x-cache: HIT
+x-cache-hits: 0
+x-timer: S1790953537.565461,VS0,VE139
+vary: Accept-Encoding
+x-fastly-request-id: 57858e144ced9c7fd2a95dcdc1476047ece56def
+content-length: 86359
+

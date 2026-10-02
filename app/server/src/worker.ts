@@ -1,4 +1,6 @@
+import type { Channel } from './channels/types.js';
 import type { Db } from './db.js';
+import { deliver } from './dispatch.js';
 import { ingestPoll, registerSource, type FeedResult, type IngestReport } from './ingest.js';
 import type { Source } from './sources/types.js';
 
@@ -40,7 +42,11 @@ export function summary(source: Source, r: IngestReport): string {
 export function startWorker(
   db: Db,
   sources: Source[],
-  { fetch = fetchText, log = console.log }: { fetch?: FetchText; log?: (msg: string) => void } = {},
+  {
+    channels = [],
+    fetch = fetchText,
+    log = console.log,
+  }: { channels?: Channel[]; fetch?: FetchText; log?: (msg: string) => void } = {},
 ): { stop: () => void } {
   const timers: NodeJS.Timeout[] = [];
   for (const source of sources) {
@@ -50,7 +56,14 @@ export function startWorker(
       if (running) return;
       running = true;
       try {
-        log(summary(source, await pollSource(db, source, fetch)));
+        const report = await pollSource(db, source, fetch);
+        log(summary(source, report));
+        // New events (notify = 1) go straight to matching and delivery.
+        const results = await deliver(db, channels, report.newEventIds);
+        if (results.length) {
+          const failed = results.filter((r) => r.status === 'failed').length;
+          log(`deliver ${source.id}: ${results.length} deliveries, ${results.length - failed} sent, ${failed} failed`);
+        }
       } catch (e) {
         log(`poll ${source.id}: crashed: ${(e as Error).message}`);
       } finally {

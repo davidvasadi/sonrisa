@@ -280,5 +280,22 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
 - Goal: Run /milestone-done for M6, keep R-020 to R-022 as described, and commit. Then build M7: matching and delivery (subscriptions → channel registry → email outbox or SMTP, Slack webhook and the stub log channel), one delivery per event, user and channel, no retries, demo inject through the whole pipeline, and Slack tests on the mock receiver. Fix the channels path in the design. List assumptions first; report real output.
 - Prompt: Verbatim in [transcripts/P-027-close-m6-start-m7.md](transcripts/P-027-close-m6-start-m7.md).
-- Result summary: M6 closed: 36 tests pass, the app runs with no `.env` (26 feeds, 0 errors), the leak check is OK, R-020 to R-022 are written, and M6 is committed. M7 is in progress.
-- Follow-up: M7
+- Result summary:
+  - M6 closed (`17befa6`).
+  - **M7 built:** channel interface and registry; email (dev outbox, or SMTP via nodemailer from its stored docs); Slack webhook (Slack escaping and `<url|text>` from the stored formatting doc, exact host check before every send, redirects refused); stub log channel. Match (forward-only, notify only), dispatch (isolated, throws count as failed, no retries, errors masked), interrupted deliveries failed at startup, demo inject through normalise → store → match → dispatch, and the destinations, subscriptions, inject and deliveries APIs.
+  - **Tests:** 69 pass. 9 mutation checks are each caught.
+  - **Real run:** inject delivered to email and log; Slack got a real `404 no_team` for Slack's placeholder webhook (saved).
+  - **Design:** the channels path and the outbox column are fixed.
+- Follow-up: [R-023](../06-ai-review/ai-review-log.md#r-023-m7-mutation-checks-and-the-redirect-gap), [R-024](../06-ai-review/ai-review-log.md#r-024-nodemailer-doc-urls-returned-404), [R-025](../06-ai-review/ai-review-log.md#r-025-real-slack-error-body-is-the-error-name), [R-026](../06-ai-review/ai-review-log.md#r-026-demo-content-did-not-match-the-chosen-category)
+
+## P-028: Close M7, start M8
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Fix the demo mismatch (one real stored item per GDACS type), keep R-023 to R-026, and say in the README that real SMTP is unverified. Move the real Slack test to M8, with the Connect button. Close M7 and commit. Then build M8: the user and admin views, live over SSE, the Connect Slack button with webhook paste beside it, and OAuth from the stored Slack docs; then stop and list the Slack setup for the real test.
+- Prompt: Verbatim in [transcripts/P-028-close-m7-start-m8.md](transcripts/P-028-close-m7-start-m8.md).
+- Result summary:
+  - **Demo items:** GDACS demo items are now one real item per event type; a test checks each type. 70 tests pass.
+  - **README:** SMTP is unverified.
+  - **M7 closed:** tests, the app with inject, and the leak check pass; R-023 to R-026 are written; committed. M8 is in progress.
+- Follow-up: M8

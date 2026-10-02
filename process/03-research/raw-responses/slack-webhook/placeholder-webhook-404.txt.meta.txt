@@ -1,0 +1,27 @@
+url: (Slack's documentation placeholder webhook, T00000000/B00000000/X…; not a real webhook)
+method: POST, body {"text":"test"}
+fetched_at: 2026-10-02T15:11:40Z
+http_status: 404
+purpose: shows the error body format for a webhook that does not exist (design F9, M7)
+
+HTTP/2 404 
+date: Fri, 02 Oct 2026 15:11:40 GMT
+server: Apache
+vary: Accept-Encoding
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+referrer-policy: no-referrer
+x-slack-unique-id: 97fac103-b655-4ddb-97ff-e9885f2895a5
+access-control-allow-origin: *
+x-frame-options: SAMEORIGIN
+content-type: text/html
+content-length: 7
+via: 1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0be8534e88d7779ba,ingress-edge-fra-prod-0960f62e0595c07d6
+x-envoy-upstream-service-time: 97
+x-backend: main_normal
+x-server: slack-www-hhvm-main-iad-q0rppncm6oqr
+x-slack-shared-secret-outcome: no-match
+x-edge-backend: envoy-www
+timing-allow-origin: *
+alt-svc: h3=":443"; ma=2592000, h3-29=":443"; ma=2592000, quic=":443"; ma=2592000
+x-slack-edge-shared-secret-outcome: no-match
+

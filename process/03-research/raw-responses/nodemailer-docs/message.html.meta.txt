@@ -1,0 +1,29 @@
+url: https://nodemailer.com/message
+fetched_at: 2026-10-02T15:05:42Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: GitHub.com
+content-type: text/html; charset=utf-8
+x-origin-cache: HIT
+last-modified: Sun, 06 Sep 2026 03:28:17 GMT
+access-control-allow-origin: *
+etag: "6a9cddd1-d282"
+expires: Fri, 02 Oct 2026 15:15:42 GMT
+cache-control: max-age=600
+x-proxy-cache: MISS
+x-github-request-id: F3A8:2EE027:B26D6:B48D0:6ABFC846
+x-github-edge-region: fra
+accept-ranges: bytes
+age: 0
+date: Fri, 02 Oct 2026 15:05:42 GMT
+via: 1.1 varnish
+x-served-by: cache-vie6345-VIE
+x-cache: MISS
+x-cache-hits: 0
+x-timer: S1790953543.860661,VS0,VE115
+vary: Accept-Encoding
+x-fastly-request-id: 26f2e1b26ec4a4f8d693fe44f8ae480989873232
+content-length: 53890
+
