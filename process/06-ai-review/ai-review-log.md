@@ -395,7 +395,11 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
   - GDACS demo data holds the first real item of each of the six event types from the stored response.
   - Inject picks the item for the chosen category.
   - A test checks every type's raw `eventtype`.
-  - BBC and UN News still use one item, relabelled with the chosen section. Not fixed: the author asked for GDACS only.
+  - BBC and UN News still used one item, relabelled with the chosen section. Not fixed at first: the author asked for GDACS only.
+  - **Follow-up ([P-031](../07-prompts/session-log.md#p-031-bbc-demo-per-section)):** after the real Slack test showed a World story labelled "Business" (R-031), BBC got the same fix. Its demo data now holds the first real item of each of the seven stored section feeds.
+  - **Test:** a per-category test, for every BBC section and every GDACS type, checks that the injected event carries exactly the picked category, and that its item really belongs there (the BBC `guid` is in that section's own stored feed; the GDACS `eventtype` matches).
+  - **Mutation check:** making inject use the first stored item again fails 12 of these tests. The two that still pass are the first category of each source, whose first item is already correct.
+  - UN News is still relabelled.
 - Related decision: D-017
 
 ## R-027: Real Slack keys briefly in .env.example

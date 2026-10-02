@@ -6,6 +6,10 @@ Copied byte for byte, except `un-news/topic-health.rss`, which was stored gzip-c
 | Fixture | Source file | sha256 of fixture |
 | --- | --- | --- |
 | `bbc/business.rss` | `bbc/business.rss` | `9c47c9d7b3f88d23…` |
+| `bbc/health.rss` | `bbc/health.rss` | `86b1e701ec0ae051…` |
+| `bbc/politics.rss` | `bbc/politics.rss` | `c28f1efb042e62ba…` |
+| `bbc/science_and_environment.rss` | `bbc/science_and_environment.rss` | `a64e1756e320d94b…` |
+| `bbc/technology.rss` | `bbc/technology.rss` | `e05e24a6f96031f6…` |
 | `bbc/top-stories.rss` | `bbc/business.rss` | `bbc/business.rss` | `9c47c9d7b3f88d23…` |
 | `bbc/top-stories.rss` | `719119e92f47419c…` |
 | `bbc/world.rss` | `bbc/world.rss` | `788cecdf6ec13679…` |

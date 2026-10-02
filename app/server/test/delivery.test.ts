@@ -9,6 +9,7 @@ import { deliver, failInterrupted } from '../src/dispatch.js';
 import { ingestPoll, registerSource } from '../src/ingest.js';
 import { injectDemo } from '../src/inject.js';
 import { seed } from '../src/seed.js';
+import { bbc } from '../src/sources/bbc.js';
 import { gdacs } from '../src/sources/gdacs.js';
 import { count, fixture, freshDb } from './helpers.js';
 
@@ -247,13 +248,23 @@ describe('demo inject goes through the whole pipeline (D-017)', () => {
     expect(count(t.db, "SELECT COUNT(*) n FROM deliveries WHERE status = 'sent'")).toBe(2);
   });
 
-  it('every GDACS type has its own real demo item, matching that type', async () => {
+  // The injected item must belong to the category that was picked, not be another item relabelled (R-026, R-031).
+  it.each(bbc.categories.map((c) => c.key))('BBC "%s": the injected story is a real item from that section\'s own feed', async (key) => {
     const t = setup();
-    for (const { key } of gdacs.categories) {
-      const { eventId } = await injectDemo(t.db, [gdacs], t.channels, 'gdacs', key);
-      const raw = JSON.parse((t.db.prepare('SELECT raw FROM events WHERE id = ?').get(eventId) as { raw: string }).raw);
-      expect(raw.properties.eventtype).toBe(key);
-    }
+    registerSource(t.db, bbc);
+    const { eventId } = await injectDemo(t.db, [bbc], t.channels, 'bbc', key);
+    expect(t.db.prepare('SELECT category_id FROM event_categories WHERE event_id = ?').all(eventId)).toEqual([{ category_id: `bbc:${key}` }]);
+    const raw = JSON.parse((t.db.prepare('SELECT raw FROM events WHERE id = ?').get(eventId) as { raw: string }).raw) as { guid: string };
+    const sectionFeed = bbc.parse(fixture(`bbc/${key}.rss`)) as { guid: string }[];
+    expect(sectionFeed.map((i) => i.guid)).toContain(raw.guid);
+  });
+
+  it.each(gdacs.categories.map((c) => c.key))('GDACS "%s": the injected event has the category and event type picked', async (key) => {
+    const t = setup();
+    const { eventId } = await injectDemo(t.db, [gdacs], t.channels, 'gdacs', key);
+    expect(t.db.prepare('SELECT category_id FROM event_categories WHERE event_id = ?').all(eventId)).toEqual([{ category_id: `gdacs:${key}` }]);
+    const raw = JSON.parse((t.db.prepare('SELECT raw FROM events WHERE id = ?').get(eventId) as { raw: string }).raw);
+    expect(raw.properties.eventtype).toBe(key);
   });
 
   it('rejects an unknown category', async () => {

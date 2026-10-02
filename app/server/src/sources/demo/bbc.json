@@ -1,9 +1,47 @@
 {
-  "from": "process/03-research/raw-responses/bbc/world.rss, first item, as returned by parse()",
-  "item": {
-    "title": "'I was not going to let others die' - pilot of Flydubai flight describes cockpit attack by co-pilot",
-    "link": "https://www.bbc.co.uk/news/articles/c639m98gde00o?at_medium=RSS&at_campaign=rss",
-    "guid": "https://www.bbc.co.uk/news/articles/c639m98gde00o#0",
-    "pubDate": "Fri, 02 Oct 2026 09:08:06 GMT"
+  "from": "process/03-research/raw-responses/bbc/<section>.rss: the first item of each section feed, as returned by parse()",
+  "items": {
+    "top-stories": {
+      "title": "School protests send shivers down French government's spine",
+      "link": "https://www.bbc.co.uk/news/articles/c69wzjjxex8po?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/articles/c69wzjjxex8po#1",
+      "pubDate": "Fri, 02 Oct 2026 12:43:02 GMT"
+    },
+    "world": {
+      "title": "'I was not going to let others die' - pilot of Flydubai flight describes cockpit attack by co-pilot",
+      "link": "https://www.bbc.co.uk/news/articles/c639m98gde00o?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/articles/c639m98gde00o#0",
+      "pubDate": "Fri, 02 Oct 2026 09:08:06 GMT"
+    },
+    "business": {
+      "title": "US jobs market sees sharp slowdown in September",
+      "link": "https://www.bbc.co.uk/news/articles/cm2d6gg0642yo?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/articles/cm2d6gg0642yo#0",
+      "pubDate": "Fri, 02 Oct 2026 13:56:36 GMT"
+    },
+    "politics": {
+      "title": "First minister demands 'new deal' for Wales, before Plaid Cymru conference",
+      "link": "https://www.bbc.co.uk/news/articles/cr0j3jdj64x7o?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/articles/cr0j3jdj64x7o#0",
+      "pubDate": "Fri, 02 Oct 2026 11:23:22 GMT"
+    },
+    "science_and_environment": {
+      "title": "How to move 1,300 plants for Kew's Palm House mega makeover",
+      "link": "https://www.bbc.co.uk/news/videos/c914d43gg2zdo?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/videos/c914d43gg2zdo#0",
+      "pubDate": "Fri, 02 Oct 2026 08:53:30 GMT"
+    },
+    "technology": {
+      "title": "OpenAI fires workers for 'mishandling sensitive information'",
+      "link": "https://www.bbc.co.uk/news/articles/c6y9z9r4ejzwo?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/articles/c6y9z9r4ejzwo#0",
+      "pubDate": "Fri, 02 Oct 2026 08:20:32 GMT"
+    },
+    "health": {
+      "title": "Coroner warns of risk of future deaths at mental health unit where patient was killed",
+      "link": "https://www.bbc.co.uk/news/articles/cqn747k6pem0o?at_medium=RSS&at_campaign=rss",
+      "guid": "https://www.bbc.co.uk/news/articles/cqn747k6pem0o#0",
+      "pubDate": "Thu, 01 Oct 2026 23:59:44 GMT"
+    }
   }
 }

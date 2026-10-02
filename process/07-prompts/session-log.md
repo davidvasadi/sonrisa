@@ -326,3 +326,15 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
   - **Close checks:** run in a clean copy without `.env` (84 tests, app, inject, SSE). That run found port 5173 already in use, and the AI's cleanup may have stopped the author's process; Vite now uses `strictPort` (R-032).
   - **M8 committed.**
 - Follow-up: [R-027](../06-ai-review/ai-review-log.md#r-027-real-slack-keys-briefly-in-envexample), [R-031](../06-ai-review/ai-review-log.md#r-031-real-slack-test-q5-answered), [R-032](../06-ai-review/ai-review-log.md#r-032-port-5173-in-use-and-a-cleanup-that-could-stop-the-authors-process)
+
+## P-031: BBC demo per section
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Approve R-027 to R-032. Fix the BBC demo mismatch the same way as GDACS (one real stored item per section), add a test that the injected item's category matches what was picked, and commit.
+- Prompt: Verbatim in [transcripts/P-031-bbc-demo-per-section.md](transcripts/P-031-bbc-demo-per-section.md).
+- Result summary:
+  - **Demo data:** the BBC demo file holds the first real item of each of the seven stored section feeds. The four missing BBC feeds were copied into the test fixtures, with checksums.
+  - **Tests:** a per-category test for all 7 BBC sections and 6 GDACS types checks the category and the item's origin. A mutation (always the first item) fails 12 of them. 96 tests pass.
+  - **Logged:** R-026 updated. UN News is still relabelled.
+- Follow-up: [R-026](../06-ai-review/ai-review-log.md#r-026-demo-content-did-not-match-the-chosen-category)
