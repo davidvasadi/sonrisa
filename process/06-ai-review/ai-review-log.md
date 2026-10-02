@@ -57,3 +57,21 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: rejected
 - What changed as a result: D-018 (no filter; source choice controls volume). Q1 closed. The research checklist now measures publishing volume per category instead of looking for severity fields.
 - Related decision: D-018
+
+## R-004: Transcript export leak check tested with planted leaks
+
+- Date: 2026-10-02
+- Prompt / session: [P-012](../07-prompts/session-log.md#p-012-code-reviewer-agent-milestone-done-skill-transcript-export)
+- What the AI produced: `export-transcripts.mjs` and a `--check` mode that looks for harness tags, fragments of thinking, tool calls, tool results and attachments, and missing turns in the export.
+- How I checked it:
+  1. Inspected the real session JSONL format before writing the parser, rather than assuming it.
+  2. Ran the export and the check: OK.
+  3. Questioned "probed 1 thinking" out of 28 thinking blocks. The session file stores thinking as empty text with a signature, except one block, so there was nothing else to leak.
+  4. Planted leaks in the export and confirmed the check fails: thinking text (FAIL), a `<system-reminder>` tag (FAIL), a real tool result (FAIL), a deleted reply (FAIL). A clean re-export passes.
+  5. Independent `grep` for harness tags, tool markers, the paste id, the home path and email addresses.
+- What I found:
+  - The AI's first tool-output test was invalid. It planted brief text, which legitimately appears in prompt 1, and Read output carries line-number prefixes. So "OK" there proved nothing. It was replaced with a planted real tool result, which the check caught.
+  - The grep found the author's git email in one assistant reply. This is not a harness leak: it is the assistant's own reply text.
+- Verdict: accepted, after correcting the invalid test
+- What changed as a result: The check is reproducible (`--check`) and part of `/milestone-done`.
+- Related decision: none

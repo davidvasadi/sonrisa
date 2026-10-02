@@ -29,3 +29,6 @@ coverage/
 *.sqlite
 *.sqlite3
 *.db
+
+# Claude Code local settings
+.claude/settings.local.json

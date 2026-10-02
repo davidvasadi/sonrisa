@@ -115,3 +115,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-011-claude-md.md](transcripts/P-011-claude-md.md).
 - Result summary: [CLAUDE.md](../../CLAUDE.md) written with the author's rules. The AI added one section not in the prompt, "Process logging", describing the logging conventions already in use.
 - Follow-up: `/milestone-done` is referenced but does not exist yet
+
+## P-012: Code-reviewer agent, /milestone-done skill, transcript export
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Create the tooling referenced in the plan and CLAUDE.md, and a reproducible export of full session transcripts.
+- Prompt: Verbatim in [transcripts/P-012-agent-skill-export.md](transcripts/P-012-agent-skill-export.md).
+- Result summary: [code-reviewer agent](../../.claude/agents/code-reviewer.md) (read-only: Read, Grep, Glob), [/milestone-done skill](../../.claude/skills/milestone-done/SKILL.md) (user-invoked only), [export-transcripts.mjs](../scripts/export-transcripts.mjs) with a `--check` leak test. First full session exported to [sessions/](transcripts/sessions/).
+- Follow-up: [R-004](../06-ai-review/ai-review-log.md#r-004-transcript-export-leak-check-tested-with-planted-leaks)
