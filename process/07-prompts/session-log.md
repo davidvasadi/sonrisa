@@ -79,3 +79,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-007-close-q1.md](transcripts/P-007-close-q1.md).
 - Result summary: D-018 logged; Q1 closed in assumptions; research checklist item 3 changed to measure volume per category; rejection logged as R-003.
 - Follow-up: [R-003](../06-ai-review/ai-review-log.md#r-003-severity-floor-for-important-rejected), D-018
+
+## P-008: Plan
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Write the plan of attack: deliverables, order and reasoning, scope, milestones with completion criteria.
+- Prompt: Verbatim in [transcripts/P-008-plan.md](transcripts/P-008-plan.md).
+- Result summary: [plan.md](../02-plan/plan.md) with 6 deliverables, ordering rationale (sources → design → vertical slice → optional paths), cut order, M1–M9 with "done when"; M1–M2 marked done.
+- Follow-up: none
