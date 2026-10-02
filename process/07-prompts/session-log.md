@@ -25,3 +25,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-001-repo-setup.md](transcripts/P-001-repo-setup.md).
 - Result summary: Created `process/` (01–08 plus `notes/` and `scripts/`), empty `app/`, root README, .gitignore; initialised git and made the first commit.
 - Follow-up: none
+
+## P-002: Fix P-001 transcript
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Restore the full P-001 prompt (the AI had abbreviated it while calling it verbatim), log the catch, rename the README title.
+- Prompt: Verbatim in [transcripts/P-002-fix-p001-transcript.md](transcripts/P-002-fix-p001-transcript.md).
+- Result summary: P-001 transcript now holds the complete prompt; R-001 logged; README title changed to "Sonrisa".
+- Follow-up: [R-001](../06-ai-review/ai-review-log.md#r-001-p-001-transcript-was-not-verbatim)

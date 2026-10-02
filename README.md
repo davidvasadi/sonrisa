@@ -1,4 +1,4 @@
-# Event Alerts — Take-Home
+# Sonrisa
 
 Response to a take-home task: turn a vague product brief ("users set up alerts for important world events, via email and Slack, extensible channels, admin view") into a working implementation using AI agents.
 
