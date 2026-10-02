@@ -1,0 +1,22 @@
+url: https://api.reliefweb.int/v2/disasters?appname=sonrisa
+fetched_at: 2026-10-02T14:03:28Z
+http_status: 403
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 403 
+date: Fri, 02 Oct 2026 14:03:28 GMT
+content-type: application/json
+content-length: 218
+vary: Accept-Encoding
+access-control-allow-origin: *
+access-control-allow-methods: GET, HEAD, OPTIONS, POST
+access-control-allow-headers: User-Agent, Content-Type
+content-security-policy: default-src 'self';
+pragma: no-cache
+x-xss-protection: 1; mode=block
+x-content-options: nosniff
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload; always;
+referrer-policy: strict-origin-when-cross-origin
+cache-control: no-cache, no-store, must-revalidate
+

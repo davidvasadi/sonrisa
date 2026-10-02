@@ -1,0 +1,23 @@
+url: https://api.frankfurter.dev/v1/latest
+fetched_at: 2026-10-02T14:03:15Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+date: Fri, 02 Oct 2026 14:03:15 GMT
+content-type: application/json; charset=utf-8
+content-length: 438
+cache-control: public, max-age=86400
+etag: "31882d3a9a99d96f61fa3842af099410"
+vary: Origin
+x-robots-tag: noindex
+deprecation: @1779103800
+link: <https://api.frankfurter.dev/v2/rates>; rel="successor-version"
+age: 175
+accept-ranges: bytes
+cf-cache-status: HIT
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=MxlOUWW2gLhv0S7dmfIppPBwEXEm%2F8wd4NxukIHURx68gAyj1KDQeuQiZkdFXvRUgWansOk2wMDGFrp5HNolX928fg8I9VKYWQK4mtlNfcL4nd8%2B%2BwXUZQs%2FNeCBJZ53T03nQebuN6Lt%2Bz6wyAbWKNA%3D"}]}
+server: cloudflare
+cf-ray: a4443fdffb8f9b13-BUD
+

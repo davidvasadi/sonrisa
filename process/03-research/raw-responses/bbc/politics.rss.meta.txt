@@ -1,0 +1,21 @@
+url: https://feeds.bbci.co.uk/news/politics/rss.xml
+fetched_at: 2026-10-02T14:00:41Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: Belfrage
+x-local-cache: EXPIRED
+belfrage-cache-status: MISS
+content-type: text/xml; charset=utf-8
+bsig: 48f765c294080d8b70a116081be96156
+brequestid: 2dac3c7c541240f985554b5ebbb1c188
+bid: cedric
+req-svc-chain: BELFRAGE
+x-shared-cache: HIT
+cache-control: public, max-age=3
+expires: Fri, 02 Oct 2026 14:00:44 GMT
+date: Fri, 02 Oct 2026 14:00:41 GMT
+content-length: 45713
+timing-allow-origin: https://www.bbc.co.uk, https://www.bbc.com
+

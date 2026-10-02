@@ -1,0 +1,20 @@
+url: https://news.un.org/feed/subscribe/en/news/all/rss.xml
+fetched_at: 2026-10-02T14:09:53Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+x-content-type-options: nosniff
+x-lagoon: amazeeio-un1>ingress-nginx>news-un-org-feeds-aio-main:nginx>
+content-type: application/rss+xml; charset=utf-8
+strict-transport-security: max-age=31536000
+fastly-request-id: f84b58c8e60ad9a2b20e3289
+server-timing: HIT, fastly;desc="Edge time";dur=0
+accept-ranges: bytes
+date: Fri, 02 Oct 2026 14:09:53 GMT
+age: 1067
+vary: Origin
+fastly-request-id: 931e81f60db175aae362e7ba
+server-timing: HIT, fastly;desc="Edge time";dur=0
+content-length: 33960
+

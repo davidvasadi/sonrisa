@@ -27,7 +27,8 @@ Two kinds of entry:
 - **Decided ([D-003](../05-decisions/decision-log.md#d-003-push-where-supported-polling-otherwise), [D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Push where the source supports it, polling otherwise. Push is built only for a source verified to offer it.
 - **Decided ([D-014](../05-decisions/decision-log.md#d-014-source-freshness-is-in-scope)):** The last successful fetch per source is recorded.
 - **Working assumption:** Latency of a few minutes is acceptable.
-- **Working assumption:** If markets survive D-016, delayed market data is acceptable and the UI says so.
+- **Decided ([D-024](../05-decisions/decision-log.md#d-024-market-movements-via-bbc-business-no-price-feeds)):** No market price feeds. Market movements come from the BBC Business section.
+- **Decided ([D-025](../05-decisions/decision-log.md#d-025-final-data-sources)):** Sources are the USGS significant earthquake feed, the GDACS default event list (Orange/Red), BBC News sections and UN News topics/regions. All are polled.
 
 ## Notification channels
 
@@ -57,10 +58,10 @@ Two kinds of entry:
 | # | Question | Status |
 | --- | --- | --- |
 | Q1 | What makes an event "important" enough to deliver, per source? | **Closed** ([D-018](../05-decisions/decision-log.md#d-018-no-importance-filter-the-source-decides)): no floor and no filter. The source's own publishing decision defines importance; source choice controls volume |
-| Q2 | Is there a free, keyless, legitimately usable source of market data? | **Rule set** ([D-016](../05-decisions/decision-log.md#d-016-drop-markets-if-they-need-a-key-or-registration)): if it needs a key or registration, markets are dropped. Research still has to check |
+| Q2 | Is there a free, keyless, legitimately usable source of market data? | **Closed** ([D-024](../05-decisions/decision-log.md#d-024-market-movements-via-bbc-business-no-price-feeds)): keyless sources exist, but they publish prices, not events. Market movements are covered by BBC Business; no price feeds |
 | Q3 | How does the user view know which user it is, without auth? | **Resolved** ([D-015](../05-decisions/decision-log.md#d-015-simple-user-picker)): simple user picker |
-| Q4 | Does any chosen free source actually offer push? | **Rule set** ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)): push only where verified. Research checks each source |
-| Q5 | Does Slack OAuth accept a `http://localhost` redirect URL? | **Checked in M3** against Slack's docs, not from memory (D-021). If localhost is not accepted, the README documents the workaround; reviewers still have the webhook option |
+| Q4 | Does any chosen free source actually offer push? | **Answered in M3** ([data sources](../03-research/data-sources.md#comparison)): no. No recommended source offers push (no WebSub hub in any RSS; USGS, GDACS and EONET are poll-only). Push (D-003) will not be built |
+| Q5 | Does Slack OAuth accept a `http://localhost` redirect URL? | **Answered from Slack's docs in M3** ([data sources](../03-research/data-sources.md#q5-slack-oauth-redirect-on-localhost)): "The redirect_uri must use HTTPS", so `http://localhost` is not accepted. Whether `https://localhost` is accepted is *unverified*, to be settled by the author's real test (D-023). The README will document the HTTPS workaround; reviewers still have the webhook option |
 | Q6 | Which SQLite driver works with `npm install` alone? | **Deferred** to project setup. Native modules (e.g. `better-sqlite3`) can fail to build; Node's built-in `node:sqlite` depends on the Node version |
 
 ## Later (out of scope for the 24-hour build)
@@ -71,7 +72,6 @@ Raised in the [brief analysis](../03-research/brief-analysis.md) and deferred by
 - Cross-source dedup (the same event reported by two sources). Dedup is per source only (D-005). Deferred by the author in P-016
 - Re-notifying when an event is revised (e.g. an earthquake's magnitude is updated)
 - Per-user rate limits and cooldowns
-- Hysteresis for market alerts that oscillate around a threshold (only relevant if markets survive D-016)
 - Automatic delivery retries with backoff (failed deliveries are still recorded and visible)
 - Alerting on source staleness (showing the last fetch is in scope, D-014)
 - Unsubscribe links, consent, and destination verification before the first send

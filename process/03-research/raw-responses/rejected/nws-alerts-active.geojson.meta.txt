@@ -1,0 +1,23 @@
+url: https://api.weather.gov/alerts/active
+fetched_at: 2026-10-02T14:03:47Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: nginx/1.28.3
+content-type: application/geo+json
+etag: W/"b0569d08c39b64e568325c592c2e0b8a:dtagent10337260504112723F6xZ:dtagent10337260504112723F6xZ"
+access-control-allow-origin: *
+access-control-expose-headers: X-Correlation-Id, X-Request-Id, X-Server-Id
+x-request-id: 01a0fced-a37a-7443-a7e4-dfbabf0c01bc
+x-correlation-id: 55dc94e
+x-server-id: vm-cprk-api-ops-app4.ncep.noaa.gov
+server-timing: dtTrId;desc="28e919be334b179e7bcbd0e85b1739d0", dtSInfo;desc="0"
+cache-control: public, max-age=5, s-maxage=5
+expires: Fri, 02 Oct 2026 14:03:52 GMT
+date: Fri, 02 Oct 2026 14:03:47 GMT
+set-cookie: dtCookie1up6hiss=v_4_srv_2_sn_C0EF86B261230F2304056E00B97641EC_perc_100000_ol_0_mul_1_app-3Aea7c4b59f27d43eb_1; Path=/; Domain=.weather.gov
+x-edge-request-id: 671a379
+vary: Accept,Feature-Flags,Accept-Language
+strict-transport-security: max-age=31536000 ; includeSubDomains ; preload
+

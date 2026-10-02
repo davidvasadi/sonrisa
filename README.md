@@ -26,3 +26,8 @@ The implementation. Empty for now; setup and run instructions will go here once 
 > **Local demo only.** There is no authentication: the user view uses a simple user picker, and the admin view is open to anyone who can reach the app, including all users' data and failed deliveries. Do not expose it on a network. See [D-006](process/05-decisions/decision-log.md#d-006-two-views-no-authentication).
 
 > **Not an emergency warning service.** Disaster and other alerts are informational only. They depend on free third-party sources and can be late, incomplete or missing. For warnings that affect your safety, follow your official local authorities.
+
+## Known gaps (decided)
+
+- **No price alerts.** "Market movements" are covered by the BBC Business news section, not by price feeds or % thresholds. Keyless price APIs exist, but they publish prices, not events ([D-024](process/05-decisions/decision-log.md#d-024-market-movements-via-bbc-business-no-price-feeds)).
+- **No GovSlack.** Pasted webhooks are accepted only on `hooks.slack.com`; GovSlack uses `slack-gov.com` ([D-022](process/05-decisions/decision-log.md#d-022-pasted-webhooks-only-to-hooksslackcom), [D-026](process/05-decisions/decision-log.md#d-026-govslack-not-supported)).

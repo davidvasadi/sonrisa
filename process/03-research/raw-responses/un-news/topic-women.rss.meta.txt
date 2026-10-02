@@ -1,0 +1,20 @@
+url: https://news.un.org/feed/subscribe/en/news/topic/women/feed/rss.xml
+fetched_at: 2026-10-02T14:10:36Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+strict-transport-security: max-age=31536000
+x-lagoon: amazeeio-un1>ingress-nginx>news-un-org-feeds-aio-main:nginx>
+content-type: application/rss+xml; charset=utf-8
+x-content-type-options: nosniff
+fastly-request-id: 0c4196f5a85cb927c5779a10
+server-timing: HIT, fastly;desc="Edge time";dur=0
+accept-ranges: bytes
+age: 2611
+date: Fri, 02 Oct 2026 14:10:36 GMT
+vary: Origin
+fastly-request-id: 5dc23d50eaaa61eec8595d69
+server-timing: HIT-CLUSTER, fastly;desc="Edge time";dur=2
+content-length: 34158
+

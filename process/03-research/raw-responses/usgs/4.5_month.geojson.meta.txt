@@ -1,0 +1,26 @@
+url: https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson
+fetched_at: 2026-10-02T13:59:12Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+content-type: application/json; charset=utf-8
+date: Fri, 02 Oct 2026 13:59:12 GMT
+access-control-allow-origin: *
+access-control-max-age: 86400
+server: Apache/2.4.52 (Ubuntu)
+cache-control: public, max-age=60
+expires: Fri, 02 Oct 2026 14:00:12 GMT
+last-modified: Fri, 02 Oct 2026 13:59:12 GMT
+x-content-type-options: nosniff
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1
+strict-transport-security: max-age=31536000
+access-control-allow-headers: *
+access-control-allow-methods: GET, OPTIONS
+vary: Accept-Encoding
+x-cache: Miss from cloudfront
+via: 1.1 14427fd6f1a8c49702b25378279dab00.cloudfront.net (CloudFront)
+x-amz-cf-pop: BUD50-P3
+x-amz-cf-id: oeHu7_XPeTosQaZzu4fhamjVHBNu_rdUYY8eyDgwQ5mYxvIdpdWKEw==
+

@@ -1,0 +1,17 @@
+url: https://feeds.npr.org/1025/rss.xml
+fetched_at: 2026-10-02T14:12:15Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+content-type: text/xml;charset=UTF-8
+x-amzn-requestid: b04fdfd8-32de-4a40-b566-e6aa1ed6f194
+x-amz-apigw-id: Enn-SE4CIAMEmUA=
+x-npr-trace-id: shimb04fdfd
+x-amzn-trace-id: Root=1-6abfb9f4-5f6faacb116fbaff4c141388;Parent=58779bec5ad4cbfe;Sampled=0;Lineage=1:e7f74265:0
+cache-control: max-age=142
+expires: Fri, 02 Oct 2026 14:14:37 GMT
+date: Fri, 02 Oct 2026 14:12:15 GMT
+content-length: 13894
+access-control-allow-origin: https://apps.npr.org
+

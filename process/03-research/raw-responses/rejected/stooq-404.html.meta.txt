@@ -1,0 +1,12 @@
+url: https://stooq.com/q/l/?s=^spx&f=sd2t2ohlcv&h&e=csv
+fetched_at: 2026-10-02T14:03:41Z
+http_status: 404
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/1.1 404 Not Found
+Server: openresty
+Date: Fri, 02 Oct 2026 14:03:41 GMT
+Content-Type: text/html
+Content-Length: 271
+Connection: keep-alive
+

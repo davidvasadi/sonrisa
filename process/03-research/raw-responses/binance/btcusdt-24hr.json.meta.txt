@@ -1,0 +1,31 @@
+url: https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT
+fetched_at: 2026-10-02T14:03:09Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+content-type: application/json;charset=UTF-8
+content-length: 557
+date: Fri, 02 Oct 2026 14:03:09 GMT
+access-control-allow-methods: GET, HEAD, OPTIONS
+server: nginx
+vary: Accept-Encoding
+x-mbx-uuid: d9d34fd3-3175-4dc0-b594-2d71fe698703
+x-mbx-used-weight: 2
+x-mbx-used-weight-1m: 2
+strict-transport-security: max-age=31536000; includeSubdomains
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+content-security-policy: default-src 'self'
+x-content-security-policy: default-src 'self'
+x-webkit-csp: default-src 'self'
+cache-control: no-cache, no-store, must-revalidate
+pragma: no-cache
+expires: 0
+access-control-allow-origin: *
+x-cache: Miss from cloudfront
+via: 1.1 d6e16e37d10f7fb0aae57613bd98cfee.cloudfront.net (CloudFront)
+x-amz-cf-pop: BUD50-P3
+x-amz-cf-id: walyF1D4Sue33Jh2P3dEPYxGi67m24xz3hgqoU1TskQDhgNdPouHvA==
+

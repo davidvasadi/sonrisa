@@ -1,0 +1,14 @@
+url: https://api.frankfurter.app/latest
+fetched_at: 2026-10-02T14:03:21Z
+http_status: 301
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 301 
+date: Fri, 02 Oct 2026 14:03:21 GMT
+content-type: text/html; charset=UTF-8
+location: https://api.frankfurter.dev/v1/latest
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=VhNG6SI7VRqyONezCUGfOLhdriY%2BYhcR%2BOHBGNkB%2FrCIHtvbfzdRvkBIFxlttciAUB%2FjWluI49mbnqsdFEfVsxQKLS5kT0baCJ4bRL7wexKkXeUEfDQpalDqVK1quXFXZ0uUjQxMcLvKfy3hEd2TbGNz"}]}
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+server: cloudflare
+cf-ray: a44440062a326588-BUD
+

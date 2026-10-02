@@ -1,0 +1,10 @@
+url: https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:english&mode=artlist&format=json&maxrecords=250&timespan=24h
+fetched_at: 2026-10-02T14:04:39Z
+http_status: 429
+note: manual retry 10 s after the 429 in artlist-english-24h.json
+
+HTTP/1.1 429 Too Many Requests
+Date: Fri, 02 Oct 2026 14:04:37 GMT
+Server: GDELT Server
+Transfer-Encoding: chunked
+

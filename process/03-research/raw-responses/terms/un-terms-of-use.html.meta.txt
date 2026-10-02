@@ -1,0 +1,33 @@
+url: https://www.un.org/en/about-us/terms-of-use
+fetched_at: 2026-10-02T14:07:19Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+date: Fri, 02 Oct 2026 14:07:19 GMT
+etag: "1790949323-0"
+last-modified: Fri, 02 Oct 2026 13:55:23 GMT
+set-cookie: AWSALBTG=naOWzzqS8drRJY0KCi01wYxccstNMvF61sbsR43eokQ0Ni3C6sWpwRjv+sY5NZIqtBwNRbHOFDDF9eJr6FLfk4SY36K3R2xvPoD0ukHLonQksz9BvrPa5O1IstMwOtNsMs+tZGEM3eIny//57VKbI7vhWLubFteVhYFTGuNOV93k; Expires=Fri, 09 Oct 2026 14:07:19 GMT; Path=/
+set-cookie: AWSALBTGCORS=naOWzzqS8drRJY0KCi01wYxccstNMvF61sbsR43eokQ0Ni3C6sWpwRjv+sY5NZIqtBwNRbHOFDDF9eJr6FLfk4SY36K3R2xvPoD0ukHLonQksz9BvrPa5O1IstMwOtNsMs+tZGEM3eIny//57VKbI7vhWLubFteVhYFTGuNOV93k; Expires=Fri, 09 Oct 2026 14:07:19 GMT; Path=/; SameSite=None; Secure
+set-cookie: AWSALB=Rj8/rvP5ZbQleAyqWUydLIfuMNbgsCWx/H6vOstIgrzSah1uMFtpEUxfHKZ4KPdynSl2BIPb95aQ7MIMj0NRg7qdTZCq885RipNWlovuZ63bUBQKY/KOkx6qUrYH; Expires=Fri, 09 Oct 2026 14:07:19 GMT; Path=/
+set-cookie: AWSALBCORS=Rj8/rvP5ZbQleAyqWUydLIfuMNbgsCWx/H6vOstIgrzSah1uMFtpEUxfHKZ4KPdynSl2BIPb95aQ7MIMj0NRg7qdTZCq885RipNWlovuZ63bUBQKY/KOkx6qUrYH; Expires=Fri, 09 Oct 2026 14:07:19 GMT; Path=/; SameSite=None
+server: Apache
+x-drupal-cache: HIT
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.jquery.com *.jsdelivr.net *.un.org unpkg.com npmcdn.com *.google-analytics.com *.twitter.com *.twimg.com *.facebook.net *.addtoany.com *.instagram.com *.tiktok.com *.tiktokcdn.com mindkit.ai mindkit.com mc.yandex.ru *.googletagmanager.com *.googleadservices.com *.doubleclick.net fareharbor.com *.infogram.com *.sojern.com *.infogram.com *.youtube.com *.flickr.com direkt-klient-embed.ifragasatt.se; style-src 'self' 'unsafe-inline' *.googleapis.com *.jsdelivr.net *.bootstrapcdn.com *.rawgit.com *.twitter.com *.twimg.com *.addtoany.com *.tiktokcdn.com *.mdirector.com static.mdirector.com cdn.un.org direkt-klient-embed.ifragasatt.se unpkg.com; img-src 'self'  *.un.org *.google-analytics.com *.doubleclick.net *.google.com *.twimg.com *.twitter.com *.addtoany.com *.ibytedtos.com mindkit.com *.entermediadb.net public.flourish.studio *.googletagmanager.com *.googleadservices.com i0.wp.com cdn.jsdelivr.net  *.sojern.com match.adsrvr.org ib.adnxs.com *.wfp.org *.unocha.org *.unicef.org *.staticflickr.com mc.yandex.com mc.yandex.ru ifr-avatars-prod.s3.eu-west-1.amazonaws.com staticcomment.ifragasatt.se verifiedupload.ifragasatt.se. verifiedupload.ifragasatt.se nginx-sdg-un-org-aio-stage.un2.amazee.io unpkg.com img-sr data:    ; media-src 'self' *.un.org *.fao.org *.libsyn.com *.un.org *.cdnapisec.kaltura.com *.prismic.io *.ifragasatt.se; frame-src 'self' *.flickr.com *.flickrembed.com *.youtube.com *.un.org toolkit.un75.online *.knightlab.com *.twitch.tv twitter.com *.twitter.com *.facebook.com forms.office.com *.brightcove.com *.addtoany.com *.arcgis.com *.brightcove.net *.soundcloud.com *.google.com *.vimeo.com *.youtube-nocookie.com *.libcal.com *.studios.ms *.azurewebsites.net *.instagram.com *.tiktok.com cn.un75.online actnow.bot *.libanswers.com *.powerbi.com *.kaltura.com *.mdirector.com summitdialogues.org *.doubleclick.net fareharbor.com flo.uri.sh embed.ted.com interactive-events.vercel.app *.spotify.com *.vercel.app *.sdg4education2030.org asksource.info *.infogram.com datawrapper.dwcdn.net momento360.com *.infogram.com direkt-klient.ifragasatt.se www.googletagmanager.com mc.yandex.com video.qbrick.com un80analytics.azurewebsites.net; child-src 'self' *.youtube.com *.brightcove.com *.brightcove.net *.cdnapisec.kaltura.com  summitdialogues.org; font-src 'self' *.gstatic.com *.jsdelivr.net *.bootstrapcdn.com *.tiktokcdn.com *.un.org direkt-klient-embed.ifragasatt.se; connect-src 'self' news.un.org *.ibytedtos.com *.google-analytics.com actnow.ai.chat *.doubleclick.net *.libchat.com *.aworld.io *.facebook.com *.un.org direkt.ifragasatt.se analytics.google.com api.direkt.ifragasatt.se direkt.ifragasatt.se *.flickr.com www.google.com  mc.yandex.com direktapi.ifragasatt.se direkt-external-socket.ifragasatt.se wss://direkt-external-socket.ifragasatt.se direktapi.ifragasatt.se cdn.jsdelivr.net *.googletagmanager.com unpkg.com; report-uri /en/report-csp-violation
+x-xss-protection: 1
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains
+content-language: en
+x-content-type-options: nosniff
+x-generator: Drupal 7 (http://drupal.org)
+link: </en/about-us/terms-of-use>; rel="canonical",</en/node/133494>; rel="shortlink"
+cache-control: public, max-age=900
+expires: Sun, 19 Nov 1978 05:00:00 GMT
+vary: Cookie,Accept-Encoding
+x-cache: Miss from cloudfront
+via: 1.1 d6e16e37d10f7fb0aae57613bd98cfee.cloudfront.net (CloudFront)
+x-amz-cf-pop: BUD50-P3
+x-amz-cf-id: byFIwPkpKv8aV-liB-Y_hBzfPm0C2ihrRN6Gg5F0qvRNb8VxpjhIUw==
+referrer-policy: strict-origin-when-cross-origin
+

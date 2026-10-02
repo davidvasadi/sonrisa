@@ -1,0 +1,21 @@
+url: https://feeds.bbci.co.uk/news/rss.xml
+fetched_at: 2026-10-02T14:00:47Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: Belfrage
+x-local-cache: EXPIRED
+belfrage-cache-status: MISS
+content-type: text/xml; charset=utf-8
+bsig: 6339ee16a45a8a60909b6e25f2e1003e
+brequestid: 8d63a2d22b9f4c88b9fbaec144df7cae
+bid: cedric
+req-svc-chain: BELFRAGE
+x-shared-cache: HIT
+cache-control: public, max-age=3
+expires: Fri, 02 Oct 2026 14:00:50 GMT
+date: Fri, 02 Oct 2026 14:00:47 GMT
+content-length: 22523
+timing-allow-origin: https://www.bbc.co.uk, https://www.bbc.com
+

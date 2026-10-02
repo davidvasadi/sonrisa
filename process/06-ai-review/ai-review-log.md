@@ -22,7 +22,7 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 ## R-001: P-001 transcript was not verbatim
 
 - Date: 2026-10-02
-- Prompt / session: [P-001](../07-prompts/session-log.md#p-001-repository-setup), fixed in [P-002](../07-prompts/session-log.md#p-002-fix-p001-transcript)
+- Prompt / session: [P-001](../07-prompts/session-log.md#p-001-repository-setup), fixed in [P-002](../07-prompts/session-log.md#p-002-fix-p-001-transcript)
 - What the AI produced: A transcript of the first prompt, with the session log saying it was "verbatim". The middle of the prompt (the full task text) had been replaced with the placeholder `[full task text — see 01-brief/brief.md]`, justified in a note as avoiding repetition.
 - How I checked it: Opened the transcript and compared it with what I had actually sent.
 - What I found: The claim "verbatim" was false. The AI decided on its own to shorten the record, which conflicts with the submission requirement "all prompts used during the process". The note in the file disclosed the shortcut, but the session log entry did not.
@@ -140,4 +140,37 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - What I found: It failed with "1 turn(s) missing from export". This was not a content leak: the AI's reply text written after step 4 wasn't in the export yet. A re-export passed (`OK: no leaks found`). Without a re-run, a stale export would have been committed.
 - Verdict: corrected
 - What changed as a result: Step 8 of the skill now re-exports and re-checks right before committing.
+- Related decision: none
+
+## R-010: Leak check raced the session file
+
+- Date: 2026-10-02
+- Prompt / session: [P-017](../07-prompts/session-log.md#p-017-review-entries-and-slack-button), fixed in [P-018](../07-prompts/session-log.md#p-018-leak-check-retry-and-m3-data-source-research)
+- What the AI produced: `export-transcripts.mjs --check`, run right after an export.
+- How I checked it: Read the failure instead of trusting a re-run. The export and check ran in the same command, so R-009's staleness (work done after step 4) could not explain it.
+- What I found: "1 turn(s) missing from export" right after a fresh export, and a pass on the next run. The likely cause is that Claude Code was still writing the assistant's latest reply to the session file when the export read it. This is unconfirmed: we don't control when the harness writes.
+- Verdict: corrected
+- What changed as a result: When the *only* failures are missing turns, `--check` waits 2 s, re-exports and checks once more. Any other failure, such as a leaked fragment or an email address, is never retried. Tested with four cases: a clean export (it hit the race on its own, retried, OK), a stale export with the last reply cut (retried, OK), a planted email (FAIL, no retry), and a planted email plus a stale export (FAIL, no retry).
+- Related decision: none
+
+## R-011: UN News feeds wrongly reported as empty
+
+- Date: 2026-10-02
+- Prompt / session: [P-018](../07-prompts/session-log.md#p-018-leak-check-retry-and-m3-data-source-research)
+- What the AI produced: A finding, stated to the author mid-task, that UN News returns HTTP 200 with zero items for slugs that don't exist (health, culture-and-education, americas), "so a 200 doesn't prove a category exists".
+- How I checked it: The analysis script later failed to parse one stored UN body. Its first bytes were `1f 8b` (gzip) and its headers showed `content-encoding: gzip`, although curl had not asked for compression.
+- What I found: The "empty" feeds were gzip-compressed. The AI had counted `<item` in compressed bytes. After decompression each feed had 30 items. The claimed server behaviour didn't exist; it came from the AI's own measurement error.
+- Verdict: corrected
+- What changed as a result: The finding was withdrawn and stated as wrong in [data-sources.md](../03-research/data-sources.md) (surprise 9). The analysis script decompresses gzip bodies, and the fetch script documents it. The file named `topic-health-EMPTY.rss` was renamed.
+- Related decision: none
+
+## R-012: Research doc claimed more than the stored evidence
+
+- Date: 2026-10-02
+- Prompt / session: [P-018](../07-prompts/session-log.md#p-018-leak-check-retry-and-m3-data-source-research)
+- What the AI produced: A first version of [data-sources.md](../03-research/data-sources.md) saying "every number below comes from that output" and listing UN topic and region feeds and NPR IDs as "verified".
+- How I checked it: Re-read each number and claim in the doc against [sample-analysis.txt](../03-research/sample-analysis.txt) and the files in `raw-responses/`.
+- What I found: The GDACS 365-day breakdown came from an ad-hoc command, not from the analysis script. Twelve UN feeds and four NPR IDs had been checked live, but their responses weren't stored. That breaks the CLAUDE.md rule that claims need a stored response. Re-fetching changed three numbers in the doc (UN overlap 32/138 to 131/369, NPR overlap 8/41 to 16/63, NPR Business 5 to 6 in 24 h).
+- Verdict: corrected
+- What changed as a result: The missing feeds were added to the fetch script and stored. The 30/90/365-day GDACS windows were added to the analysis script. The doc was updated to the regenerated numbers.
 - Related decision: none

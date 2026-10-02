@@ -1,0 +1,21 @@
+url: https://feeds.bbci.co.uk/news/science_and_environment/rss.xml
+fetched_at: 2026-10-02T14:00:22Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: Belfrage
+x-local-cache: EXPIRED
+belfrage-cache-status: MISS
+content-type: text/xml; charset=utf-8
+bsig: e0c4d12decfaec64f5a9a690cc301eab
+brequestid: ae19fac8744b4a3eacedc3ad39e9c357
+bid: cedric
+req-svc-chain: BELFRAGE
+x-shared-cache: STALE
+cache-control: public, max-age=1
+expires: Fri, 02 Oct 2026 14:00:23 GMT
+date: Fri, 02 Oct 2026 14:00:22 GMT
+content-length: 31110
+timing-allow-origin: https://www.bbc.co.uk, https://www.bbc.com
+

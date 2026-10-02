@@ -30,6 +30,7 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 | D-018 | [P-007](../07-prompts/session-log.md#p-007-close-q1) |
 | D-019, D-020 | [P-009](../07-prompts/session-log.md#p-009-priorities-and-review-milestone) |
 | D-021 to D-023 | [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions), D-021 completed in [P-017](../07-prompts/session-log.md#p-017-review-entries-and-slack-button) |
+| D-024 to D-026 | [P-019](../07-prompts/session-log.md#p-019-m3-source-decisions) |
 
 "Why" quotes the author where a reason was given. Where none was given in P-005, the AI drafted one, marked *AI-inferred, confirmed*: the author reviewed and confirmed these in P-006.
 
@@ -290,3 +291,49 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 - Why: Author decision. Tests stay key-free and repeatable; one real send proves the integration.
 - AI involvement: Gap raised by the AI in P-015; the approach is the author's.
 - Consequences / trade-offs: The mock only proves we send what we think Slack expects; the real test and screenshot are the proof that Slack accepts it. Until that test is done, docs must call Slack delivery "tested against a mock only". Note: with D-022, tests must allow the mock's host only in test configuration, never in normal runs.
+
+## D-024: Market movements via BBC Business, no price feeds
+
+- Date: 2026-10-02
+- Status: accepted (resolves Q2; applies [D-016](#d-016-drop-markets-if-they-need-a-key-or-registration) and [D-018](#d-018-no-importance-filter-the-source-decides))
+- Context: M3 found four keyless market sources (CoinGecko, Coinbase, Binance, Frankfurter), so D-016 does not drop markets. But all of them return price snapshots, not events. A "movement" alert would need a threshold chosen by the system, which D-018 rejects, and event detection, which the assumptions exclude ([data sources](../03-research/data-sources.md#what-was-different-from-what-i-expected)).
+- Options considered:
+  1. Drop price feeds; cover market movements through BBC Business, where the source decides what is newsworthy.
+  2. One documented D-018 exception: a fixed movement rule on one keyless price source.
+  3. Drop markets entirely.
+- Decision: Option 1. There are no price feeds. Market movements are covered by the BBC Business section. The README names the gap: no price-based or per-instrument alerts.
+- Why: Author decision. It keeps D-018 intact: the source decides what is important.
+- AI involvement: The AI found the conflict and recommended option 1.
+- Consequences / trade-offs: Users can't set alerts on a ticker or a % move. Coverage of markets is whatever BBC Business publishes.
+
+## D-025: Final data sources
+
+- Date: 2026-10-02
+- Status: accepted (closes the M3 source choice)
+- Context: M3 checked 16 candidate sources with real calls ([data sources](../03-research/data-sources.md)).
+- Decision:
+  - **USGS: the significant earthquake feed only** (about 0.3/day). The M4.5+ feed (17/day) is not offered.
+  - **GDACS: the default event list**, which contains only Orange and Red alerts (about 0.23/day across six event types). The RSS feed, which is mostly Green alerts, is not used.
+  - **BBC News: section feeds.** Volume is up to about 25/day for Top stories and World. That is acceptable because the user decides which sections to subscribe to.
+  - **UN News: topic and region feeds** (0–16 items a week per feed).
+  - Not used: EONET (mostly republished GDACS), NPR (kept as a fallback), Al Jazeera, GDELT, NWS, and the keyed or registration-gated sources (Guardian, ReliefWeb).
+- Why: Author decision, following the AI's recommendation, with BBC kept despite its volume.
+- AI involvement: The AI recommended these sources and flagged BBC's volume and the USGS M4.5+ option as questions. The author answered both.
+- Consequences / trade-offs:
+  - None of these sources offers push (Q4), so all are polled.
+  - New items must be detected by `guid` or ID, not by time (UN dates have no time; BBC section feeds aren't chronological).
+  - Event dedup keys on source + ID, not feed + ID.
+  - A USGS earthquake may also appear in GDACS as EQ. That is cross-source dedup, which is under Later.
+  - GDACS forecast items must be shown as forecasts.
+  - Terms: BBC requires "BBC News" attribution and no logos. UN News allows personal, non-commercial use only, which is fine for a demo but not a product.
+
+## D-026: GovSlack not supported
+
+- Date: 2026-10-02
+- Status: accepted (keeps [D-022](#d-022-pasted-webhooks-only-to-hooksslackcom))
+- Context: Slack's webhook doc says GovSlack apps use "the slack-gov.com domain instead of the slack.com domain". D-022 accepts only `hooks.slack.com`.
+- Decision: Keep D-022 unchanged. GovSlack webhooks are not supported, and the README notes the gap.
+- Why: Author decision.
+- AI involvement: Found by the AI while answering Q5 from Slack's docs. The AI recommended keeping D-022.
+- Consequences / trade-offs: A GovSlack workspace can't receive alerts. Supporting it later means allowing one more exact host.
+

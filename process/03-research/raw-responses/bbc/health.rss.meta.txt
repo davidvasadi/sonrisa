@@ -1,0 +1,20 @@
+url: https://feeds.bbci.co.uk/news/health/rss.xml
+fetched_at: 2026-10-02T14:00:35Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: Belfrage
+x-local-cache: EXPIRED
+belfrage-cache-status: MISS
+content-type: text/xml; charset=utf-8
+bsig: cfc23008a45dc436aa76226b53202db8
+brequestid: 4d38c7c8c59d4c84ab2eead5eb0b47e5
+bid: cedric
+req-svc-chain: BELFRAGE
+x-shared-cache: HIT
+cache-control: public, max-age=3
+expires: Fri, 02 Oct 2026 14:00:38 GMT
+date: Fri, 02 Oct 2026 14:00:35 GMT
+timing-allow-origin: https://www.bbc.co.uk, https://www.bbc.com
+

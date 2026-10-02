@@ -37,7 +37,7 @@ Set by what the task evaluates and what the brief literally asks for, not by eff
 **Cut first if time runs out** (in this order)
 1. Push ingestion (D-003)
 2. UI polish
-3. Markets (D-016)
+3. ~~Markets (D-016)~~ resolved by D-024: no price feeds
 
 SMTP is not on any of these lists. Email is covered by the dev outbox; SMTP is an optional extra.
 
@@ -61,7 +61,7 @@ Each milestone ends with a commit, and each one's checks are logged in the [AI r
 | --- | --- | --- |
 | M1 | Repo and process setup | Folder structure, log templates and the verbatim brief are committed. **Done** |
 | M2 | Brief analysis and decisions | AI analysis committed before the author's decisions. Decisions logged. Q1–Q4 settled. **Done** |
-| M3 | Data source verification | Every candidate source was checked with a real call and its response is stored in `raw-responses/`. The checklist and category inventory are filled in. Volume per category is measured. Markets are kept or dropped under D-016. Final sources are chosen. Q5 (Slack OAuth localhost redirect) is answered from Slack's docs, with a workaround noted if needed (D-021) |
+| M3 | Data source verification | Every candidate source was checked with a real call and its response is stored in `raw-responses/`. The checklist and category inventory are filled in. Volume per category is measured. Markets are kept or dropped under D-016. Final sources are chosen. Q5 (Slack OAuth localhost redirect) is answered from Slack's docs, with a workaround noted if needed (D-021). **Done** |
 | M4 | Design | [design.md](../04-design/design.md) covers the architecture, event format, data model, source and channel interfaces, API and live updates. The author has reviewed it, and the decisions are logged |
 | M5 | App skeleton | A fresh clone runs with `npm install && npm run dev` and starts the API, worker and web UI. SQLite works (Q6 resolved). Demo users are seeded and the user picker works |
 | M6 | Ingestion | Real events from at least one source are normalised and stored. Running the fetch again creates no duplicates. *(Should have:)* more than one source, and the last successful fetch recorded per source. *(Cut first:)* push, only where M3 verified it |

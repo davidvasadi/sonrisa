@@ -1,0 +1,16 @@
+url: https://eonet.gsfc.nasa.gov/docs/v3
+fetched_at: 2026-10-02T14:07:13Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/1.1 200 OK
+Date: Fri, 02 Oct 2026 14:07:12 GMT
+Server: Apache
+Cache-Control: max-age=1800, public
+Set-Cookie: XSRF-TOKEN=eyJpdiI6IktWVzlNNjVtclRaTEQ3L21MSmxHc1E9PSIsInZhbHVlIjoiTXVOdmY2eWlLZHp6dVd6dTdsRDl0czk4enh6M0M0MG5sWU9ZUDVvUm90R0FQVVBzTEJvRFYrTEpFcW1NNk1HVmVKNnFhT2hmZ0JNZXVUdGlUSGJ0RDhPWWR5SGdiaGc1Z1F3R0pKS2ZJN1Z3Y2VWeVpkbGY4NEdJUU05NzB6WloiLCJtYWMiOiJiYzgzZDYzYWJjOWExZGU5N2EyMTQ2YWI0NDI5YTM1OWE3ZThjYmUzYzUxNmY3YTBjNDEzZjhiY2U4OGI0ODIwIiwidGFnIjoiIn0%3D; expires=Fri, 02 Oct 2026 16:07:12 GMT; Max-Age=7200; path=/; secure; samesite=none
+Set-Cookie: eonet_saml_secure_session=eyJpdiI6InQ0OXZwU3krNisrM2dmcUpoZ2dDYnc9PSIsInZhbHVlIjoiNVd4Z0JZNGVQK3BkUFVBazdOTk52R2VlbU16UkViWGNSWVZNVGw1TjZjcG1Jd0JkZFA2WS9MTEFNeTdxeTJ1SzJuaTZjMHdIeUtHMEE4WDZVb0s0K01ZYzRPVGJ3SXltY3NESWg3eDhpOHpaQzYvRncxWUxSbTNXaW5ITXR6VlUiLCJtYWMiOiIwNzczMDQwOWMxZjRlOGU5ZDIyY2U0ZGNiMzQyODlhZWIyODViMGZlY2NjNzdkMjVkYWQ0YmQ3MGUwZDQxODFmIiwidGFnIjoiIn0%3D; expires=Fri, 02 Oct 2026 16:07:12 GMT; Max-Age=7200; path=/; secure; httponly; samesite=none
+Strict-Transport-Security: max-age=31557600
+ETag: "cffa70dc04da9ba8d4fb4ca54700eb08"
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=utf-8
+

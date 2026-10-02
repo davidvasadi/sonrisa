@@ -1,0 +1,21 @@
+url: https://news.un.org/feed/subscribe/en/news/topic/economic-development/feed/rss.xml
+fetched_at: 2026-10-02T14:10:18Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+x-lagoon: amazeeio-un1>ingress-nginx>news-un-org-feeds-aio-main:nginx>
+x-content-type-options: nosniff
+content-encoding: gzip
+strict-transport-security: max-age=31536000
+content-type: application/rss+xml; charset=utf-8
+fastly-request-id: 388bfecdf76383edf9046fd5
+server-timing: HIT, fastly;desc="Edge time";dur=0
+accept-ranges: bytes
+age: 736
+date: Fri, 02 Oct 2026 14:10:18 GMT
+vary: Origin
+fastly-request-id: d6f21f6c8cd4b8ef260d59b8
+server-timing: HIT-CLUSTER, fastly;desc="Edge time";dur=3
+content-length: 7116
+

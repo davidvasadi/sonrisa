@@ -1,0 +1,26 @@
+url: https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson
+fetched_at: 2026-10-02T13:59:25Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+content-type: application/json; charset=utf-8
+date: Fri, 02 Oct 2026 13:59:25 GMT
+access-control-allow-origin: *
+access-control-max-age: 86400
+server: Apache/2.4.52 (Ubuntu)
+cache-control: public, max-age=60
+expires: Fri, 02 Oct 2026 14:00:25 GMT
+last-modified: Fri, 02 Oct 2026 13:59:25 GMT
+x-content-type-options: nosniff
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1
+strict-transport-security: max-age=31536000
+access-control-allow-headers: *
+access-control-allow-methods: GET, OPTIONS
+vary: Accept-Encoding
+x-cache: Miss from cloudfront
+via: 1.1 21720f8872015c246d27742f89fbc6a0.cloudfront.net (CloudFront)
+x-amz-cf-pop: BUD50-P3
+x-amz-cf-id: RwC_vq5sZaAkYUr9v7yL9iUxoLulueLauBZY7mLJywcPmWUqxryOuw==
+

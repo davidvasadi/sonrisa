@@ -1,0 +1,123 @@
+
+## USGS earthquakes (GeoJSON summary feeds)
+
+significant_month: metadata.count=8, features=8, nominal window 30 d -> 0.3/day; observed span 26.4 d
+  properties.type: {'earthquake': 8}
+  properties.alert (PAGER): {'green': 6, None: 1, 'orange': 1}
+  properties.status: {'reviewed': 8}
+  features with more than one network id in properties.ids: 5
+4.5_month: metadata.count=521, features=521, nominal window 30 d -> 17.4/day; observed span 29.7 d
+  properties.type: {'earthquake': 521}
+  properties.alert (PAGER): {None: 478, 'green': 42, 'orange': 1}
+  properties.status: {'reviewed': 521}
+  features with more than one network id in properties.ids: 26
+2.5_week: metadata.count=323, features=323, nominal window 7 d -> 46.1/day; observed span 6.9 d
+  properties.type: {'earthquake': 323}
+  properties.alert (PAGER): {None: 308, 'green': 15}
+  properties.status: {'reviewed': 286, 'automatic': 37}
+  features with more than one network id in properties.ids: 86
+all_day: metadata.count=215, features=215, nominal window 1 d -> 215.0/day; observed span 1.0 d
+  properties.type: {'earthquake': 212, 'quarry blast': 1, 'explosion': 2}
+  properties.alert (PAGER): {None: 215}
+  properties.status: {'automatic': 140, 'reviewed': 75}
+  features with more than one network id in properties.ids: 8
+  updated - time (minutes): min 1, median 4, max 1378
+  sample id: ci41342111, properties.ids: ,ci41342111,
+
+## GDACS (event list API and RSS)
+
+eventlist SEARCH (no parameters): 88 features, fetched 2026-10-02 13:59Z
+  properties.eventtype: {'DR': 6, 'TC': 17, 'FL': 21, 'VO': 6, 'EQ': 23, 'WF': 15}
+  properties.alertlevel: {'Orange': 70, 'Red': 18}
+  properties.iscurrent: {'true': 2, 'false': 86}
+  properties.fromdate range: 2025-05-21T00:00:00 .. 2026-09-22T18:00:00
+  fromdate in last 30 d: 3 events (0.1/day), by eventtype {'TC': 2, 'VO': 1}
+  fromdate in last 90 d: 31 events (0.3/day), by eventtype {'EQ': 7, 'FL': 5, 'TC': 5, 'VO': 2, 'WF': 12}
+  fromdate in last 365 d: 84 events (0.2/day), by eventtype {'DR': 5, 'EQ': 23, 'FL': 19, 'TC': 16, 'VO': 6, 'WF': 15}
+
+rss.xml: 212 items, pubDate 2026-02-04 .. 2026-10-02
+  pubDate in last 7 d: 145 items (20.7/day)
+    EQ Green: 3 (0.4/day)
+    FL Green: 11 (1.6/day)
+    TC Green: 4 (0.6/day)
+    WF Green: 127 (18.1/day)
+  pubDate in last 30 d: 196 items (6.5/day)
+    DR Green: 1 (0.0/day)
+    EQ Green: 3 (0.1/day)
+    FL Green: 17 (0.6/day)
+    TC Green: 7 (0.2/day)
+    TC Red: 1 (0.0/day)
+    WF Green: 167 (5.6/day)
+  items whose gdacs:fromdate is after the fetch time (forecasts): 2
+  duplicate guids within the feed: 0
+  sample guid: FL1104169 (eventtype + eventid; episodeid 1 is separate)
+
+## NASA EONET (v3)
+
+categories.json: drought ("Drought"), dustHaze ("Dust and Haze"), earthquakes ("Earthquakes"), floods ("Floods"), landslides ("Landslides"), manmade ("Manmade"), seaLakeIce ("Sea and Lake Ice"), severeStorms ("Severe Storms"), snow ("Snow"), tempExtremes ("Temperature Extremes"), volcanoes ("Volcanoes"), waterColor ("Water Color"), wildfires ("Wildfires")
+
+events?status=all&days=30: 866 events
+  wildfires: 780 (26.0/day)
+  floods: 57 (1.9/day)
+  severeStorms: 18 (0.6/day)
+  seaLakeIce: 11 (0.4/day)
+  sources[].id: {'GDACS': 761, 'IRWIN': 76, 'JTWC': 14, 'NOAA_NHC': 11, 'NATICE': 11, 'EO': 5, 'BYU_ICE': 1}
+  events with a geometry date after the fetch time: 2
+  events whose "closed" date is after the fetch time: 2
+  geometry points per event: min 1, max 65
+
+## News RSS feeds
+
+bbc:
+  world: 30 items, last 24 h 25, last 7 d 30, oldest 2026-10-01
+  business: 52 items, last 24 h 21, last 7 d 36, oldest 2026-06-30
+  science_and_environment: 42 items, last 24 h 10, last 7 d 28, oldest 2026-04-11
+  technology: 21 items, last 24 h 2, last 7 d 15, oldest 2026-09-05
+  health: 51 items, last 24 h 2, last 7 d 18, oldest 2026-06-04
+  politics: 61 items, last 24 h 12, last 7 d 46, oldest 2026-08-01
+  top-stories: 29 items, last 24 h 28, last 7 d 28, oldest 2025-04-30
+  guids appearing in more than one bbc feed: 8 of 278
+un-news:
+  all: 30 items, last 24 h 2, last 7 d 30, oldest 2026-09-28, pubDate 12:00:00 on 30/30
+  topic-climate-change: 30 items, last 24 h 0, last 7 d 1, oldest 2026-08-25, pubDate 12:00:00 on 30/30
+  topic-humanitarian-aid: 30 items, last 24 h 0, last 7 d 8, oldest 2026-09-09, pubDate 12:00:00 on 30/30
+  topic-peace-and-security: 30 items, last 24 h 0, last 7 d 14, oldest 2026-09-21, pubDate 12:00:00 on 30/30
+  topic-economic-development: 30 items, last 24 h 0, last 7 d 2, oldest 2026-07-13, pubDate 12:00:00 on 30/30
+  topic-health: 30 items, last 24 h 1, last 7 d 4, oldest 2026-08-12, pubDate 12:00:00 on 30/30
+  topic-human-rights: 30 items, last 24 h 0, last 7 d 4, oldest 2026-08-19, pubDate 12:00:00 on 30/30
+  topic-women: 30 items, last 24 h 0, last 7 d 1, oldest 2026-03-22, pubDate 12:00:00 on 30/30
+  topic-law-and-crime-prevention: 30 items, last 24 h 0, last 7 d 2, oldest 2026-06-02, pubDate 12:00:00 on 30/30
+  topic-migrants-and-refugees: 30 items, last 24 h 1, last 7 d 3, oldest 2026-04-21, pubDate 12:00:00 on 30/30
+  topic-un-affairs: 30 items, last 24 h 0, last 7 d 16, oldest 2026-09-24, pubDate 12:00:00 on 30/30
+  topic-sdgs: 30 items, last 24 h 0, last 7 d 3, oldest 2026-02-25, pubDate 12:00:00 on 30/30
+  topic-culture-and-education: 30 items, last 24 h 0, last 7 d 0, oldest 2026-06-15, pubDate 12:00:00 on 30/30
+  region-africa: 30 items, last 24 h 0, last 7 d 7, oldest 2026-08-30, pubDate 12:00:00 on 30/30
+  region-americas: 30 items, last 24 h 0, last 7 d 3, oldest 2026-07-20, pubDate 12:00:00 on 30/30
+  region-asia-pacific: 30 items, last 24 h 0, last 7 d 4, oldest 2026-07-28, pubDate 12:00:00 on 30/30
+  region-middle-east: 30 items, last 24 h 1, last 7 d 7, oldest 2026-09-07, pubDate 12:00:00 on 30/30
+  region-europe: 30 items, last 24 h 0, last 7 d 0, oldest 2026-07-14, pubDate 12:00:00 on 30/30
+  guids appearing in more than one un-news feed: 131 of 369
+npr:
+  1001-news: 10 items, last 24 h 10, last 7 d 10, oldest 2026-10-01
+  1002-home-top-stories: 10 items, last 24 h 10, last 7 d 10, oldest 2026-10-01
+  1003-national: 10 items, last 24 h 10, last 7 d 10, oldest 2026-10-01
+  1004-world: 10 items, last 24 h 3, last 7 d 10, oldest 2026-09-30
+  1006-business: 10 items, last 24 h 6, last 7 d 10, oldest 2026-09-30
+  1007-science: 10 items, last 24 h 4, last 7 d 10, oldest 2026-09-28
+  1019-technology: 10 items, last 24 h 4, last 7 d 10, oldest 2026-09-30
+  1025-environment: 10 items, last 24 h 1, last 7 d 6, oldest 2026-09-22
+  1128-health: 10 items, last 24 h 3, last 7 d 10, oldest 2026-09-30
+  guids appearing in more than one npr feed: 16 of 63
+aljazeera:
+  all: 25 items, last 24 h 25, last 7 d 25, oldest 2026-10-02
+    <category>: {'Sport': 4, 'News': 11, 'Features': 2, 'Show Types': 6, 'Opinions': 2}
+  guids appearing in more than one aljazeera feed: 0 of 25
+
+## Market data (snapshots, not events)
+
+coingecko/simple-price.json: top-level keys ['bitcoin', 'ethereum']
+coinbase/btc-usd-stats.json: top-level keys ['open', 'high', 'low', 'last', 'volume', 'volume_30day', 'rfq_volume_24hour', 'rfq_volume_30day']
+coinbase/btc-usd-ticker.json: top-level keys ['ask', 'bid', 'volume', 'trade_id', 'price', 'size', 'time', 'rfq_volume']
+binance/btcusdt-24hr.json: top-level keys ['symbol', 'priceChange', 'priceChangePercent', 'weightedAvgPrice', 'prevClosePrice', 'lastPrice', 'lastQty', 'bidPrice', 'bidQty', 'askPrice', 'askQty', 'openPrice', 'highPrice', 'lowPrice', 'volume', 'quoteVolume', 'openTime', 'closeTime', 'firstId', 'lastId', 'count']
+frankfurter/latest.json: top-level keys ['amount', 'base', 'date', 'rates']
+None of these responses contains an event list, an event id, or a category. Each is a price snapshot.

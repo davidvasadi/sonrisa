@@ -1,0 +1,21 @@
+url: https://news.un.org/feed/subscribe/en/news/region/europe/feed/rss.xml
+fetched_at: 2026-10-02T14:11:38Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+strict-transport-security: max-age=31536000
+x-lagoon: amazeeio-un1>ingress-nginx>news-un-org-feeds-aio-main:nginx>
+content-encoding: gzip
+content-type: application/rss+xml; charset=utf-8
+x-content-type-options: nosniff
+fastly-request-id: be0358e3a2b3f422dc24389e
+server-timing: HIT, fastly;desc="Edge time";dur=0
+accept-ranges: bytes
+age: 509
+date: Fri, 02 Oct 2026 14:11:38 GMT
+vary: Origin
+fastly-request-id: 45d2ea254cf77409d28e45b5
+server-timing: HIT-CLUSTER, fastly;desc="Edge time";dur=2
+content-length: 6856
+

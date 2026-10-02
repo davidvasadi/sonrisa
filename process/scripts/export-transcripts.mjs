@@ -156,8 +156,10 @@ function exportAll() {
 }
 
 // Leak check: everything that was meant to be dropped must not appear in the export.
+// Returns the failure count and how many of them were only "turn missing".
 function check() {
   let failures = 0;
+  let missingOnly = 0;
   const fail = (msg) => {
     failures += 1;
     console.log(`LEAK  ${msg}`);
@@ -242,7 +244,10 @@ function check() {
     // 4. Every prompt and reply made it in.
     const prompts = turns.filter((t) => t.role === 'user');
     const missing = turns.filter((t) => !md.includes(t.text));
-    if (missing.length) fail(`${sessionId}: ${missing.length} turn(s) missing from export`);
+    if (missing.length) {
+      fail(`${sessionId}: ${missing.length} turn(s) missing from export`);
+      missingOnly += 1;
+    }
 
     console.log(
       `${path.relative(repoRoot, target)}: ${prompts.length} prompts, ${turns.length - prompts.length} replies; ` +
@@ -251,8 +256,19 @@ function check() {
     );
   }
   console.log(failures ? `FAIL: ${failures} leak(s)` : 'OK: no leaks found');
-  process.exit(failures ? 1 : 0);
+  return { failures, missingOnly };
 }
 
-if (process.argv.includes('--check')) check();
-else exportAll();
+if (process.argv.includes('--check')) {
+  let { failures, missingOnly } = check();
+  // A "turn missing" failure alone can mean the session file was still being
+  // written when the export ran (R-010). Retry once: wait, re-export, re-check.
+  // Any other failure is a real leak and is never retried.
+  if (failures > 0 && failures === missingOnly) {
+    console.log('Only missing turns: waiting 2 s, re-exporting and checking once more (R-010)');
+    await new Promise((r) => setTimeout(r, 2000));
+    exportAll();
+    ({ failures } = check());
+  }
+  process.exit(failures ? 1 : 0);
+} else exportAll();

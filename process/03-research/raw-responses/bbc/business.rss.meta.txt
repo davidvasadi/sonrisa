@@ -1,0 +1,21 @@
+url: https://feeds.bbci.co.uk/news/business/rss.xml
+fetched_at: 2026-10-02T14:00:16Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: Belfrage
+x-local-cache: HIT
+belfrage-cache-status: MISS
+content-type: text/xml; charset=utf-8
+bsig: b32905755ac1c6f2f96197286f471566
+brequestid: af7ed87ef4324455b68f01a32ecc1e0a
+bid: cedric
+req-svc-chain: BELFRAGE
+x-shared-cache: STALE
+cache-control: public, max-age=2
+expires: Fri, 02 Oct 2026 14:00:18 GMT
+date: Fri, 02 Oct 2026 14:00:16 GMT
+content-length: 38144
+timing-allow-origin: https://www.bbc.co.uk, https://www.bbc.com
+

@@ -1,0 +1,21 @@
+url: https://www.aljazeera.com/xml/rss/all.xml
+fetched_at: 2026-10-02T14:02:20Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+server: nginx
+content-type: application/rss+xml; charset=UTF-8
+last-modified: Fri, 02 Oct 2026 13:35:03 GMT
+etag: W/"ce4ab5055439192e306af7e65a6c799d"
+x-hacker: If you're reading this, you should visit https://join.a8c.com/viphacker and apply to join the fun, mention this header.
+x-powered-by: WordPress VIP <https://wpvip.com>
+host-header: a9130478a60e5f9135f765b23f26593b
+link: <https://wordpress.aljazeera.com/wp-json/>; rel="https://api.w.org/"
+x-applied-cache-control: stale-while-revalidate=43200
+cache-control: max-age=300, must-revalidate
+x-rq: hhn1 182 253 80
+date: Fri, 02 Oct 2026 14:02:20 GMT
+content-length: 17053
+strict-transport-security: max-age=15768000
+

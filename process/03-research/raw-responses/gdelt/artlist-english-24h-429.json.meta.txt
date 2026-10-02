@@ -1,0 +1,10 @@
+url: https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:english&mode=artlist&format=json&maxrecords=250&timespan=24h
+fetched_at: 2026-10-02T14:02:38Z
+http_status: 429
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/1.1 429 Too Many Requests
+Date: Fri, 02 Oct 2026 14:02:38 GMT
+Server: GDELT Server
+Transfer-Encoding: chunked
+

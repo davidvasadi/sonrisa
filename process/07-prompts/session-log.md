@@ -169,3 +169,21 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-017-review-entries-and-slack-button.md](transcripts/P-017-review-entries-and-slack-button.md).
 - Result summary: R-007 to R-009 written. /milestone-done step 8 now re-exports and re-checks before committing. D-021 records the disabled button with a short note, next to the paste-webhook option. Q5 is to be checked in M3, with a README workaround if localhost fails. M2 follow-up committed.
 - Follow-up: [R-009](../06-ai-review/ai-review-log.md#r-009-transcript-export-was-stale-at-commit-time), Q5 in M3
+
+## P-018: Leak-check retry and M3 data source research
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Log R-010 and add the leak-check retry. Then run M3: find free sources for news, disasters and (only if keyless) markets, check their real categories, call every one and store raw responses, map the event fields, measure volume, report surprises, recommend sources, and answer Q5 from Slack's docs. No app code.
+- Prompt: Verbatim in [transcripts/P-018-m3-data-source-research.md](transcripts/P-018-m3-data-source-research.md).
+- Result summary: `--check` retries once when the only failures are missing turns (R-010), tested with four cases. 16 sources were called. Raw responses, terms pages and Slack docs are stored by [fetch-samples.sh](../scripts/fetch-samples.sh) and measured by [analyse-samples.py](../scripts/analyse-samples.py). [data-sources.md](../03-research/data-sources.md) has the category inventory, field paths, volumes, 11 surprises and a recommendation. Main finding: keyless market APIs exist but publish prices, not events, which conflicts with D-018. Q4 answered (no push). Q5 answered (HTTPS required, `https://localhost` unverified). Two AI errors were caught during the work (R-011, R-012).
+- Follow-up: [R-010](../06-ai-review/ai-review-log.md#r-010-leak-check-raced-the-session-file), [R-011](../06-ai-review/ai-review-log.md#r-011-un-news-feeds-wrongly-reported-as-empty), [R-012](../06-ai-review/ai-review-log.md#r-012-research-doc-claimed-more-than-the-stored-evidence), four author decisions requested
+
+## P-019: M3 source decisions
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Answer the four M3 questions, log them, and close M3 with /milestone-done.
+- Prompt: Verbatim in [transcripts/P-019-m3-source-decisions.md](transcripts/P-019-m3-source-decisions.md).
+- Result summary: D-024 (market movements via BBC Business, no price feeds), D-025 (final sources: USGS significant only, GDACS default list, BBC sections at the user's choice, UN News) and D-026 (GovSlack not supported) were logged. Q2 closed. README names both gaps. M3 marked done.
+- Follow-up: D-024 to D-026

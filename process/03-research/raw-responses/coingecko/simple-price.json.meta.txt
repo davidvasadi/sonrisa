@@ -1,0 +1,36 @@
+url: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true&include_last_updated_at=true
+fetched_at: 2026-10-02T14:02:44Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+date: Fri, 02 Oct 2026 14:02:44 GMT
+content-type: application/json; charset=utf-8
+cf-ray: a4443f1d2f9c1ce6-BUD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+age: 15
+cache-control: max-age=30, public, must-revalidate, s-maxage=60
+etag: W/"cac69000a029030716cab7ca8c967f82"
+server: cloudflare
+strict-transport-security: max-age=600, max-age=15724800; includeSubdomains
+vary: Accept-Encoding,Origin
+via: 1.1 e8eef83cd13aefba4fb880502e4a1c40.cloudfront.net (CloudFront)
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+access-control-allow-methods: POST, PUT, DELETE, GET, OPTIONS
+access-control-expose-headers: link, per-page, total
+access-control-request-method: *
+alt-svc: h3=":443"; ma=86400
+content-security-policy-report-only: script-src https://accounts.google.com/gsi/client; frame-src https://accounts.google.com/gsi/; connect-src https://accounts.google.com/gsi/;
+referrer-policy: strict-origin-when-cross-origin
+x-amz-cf-id: qLVHFE0lPfKwpUgMgUJU61y_dVlRv9R1HKih7cN9haWP8i7uUgrbUA==
+x-amz-cf-pop: VIE50-P2
+x-cache: Hit from cloudfront
+x-content-type-options: nosniff
+x-data-source: 2.0
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-request-id: b5642f3d-3ac9-4f32-a2ca-762ab8cfd2d4
+x-runtime: 0.010581
+x-xss-protection: 0
+

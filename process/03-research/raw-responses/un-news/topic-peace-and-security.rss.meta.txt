@@ -1,0 +1,20 @@
+url: https://news.un.org/feed/subscribe/en/news/topic/peace-and-security/feed/rss.xml
+fetched_at: 2026-10-02T14:10:12Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 200 
+x-lagoon: amazeeio-un1>ingress-nginx>news-un-org-feeds-aio-main:nginx>
+strict-transport-security: max-age=31536000
+x-content-type-options: nosniff
+content-type: application/rss+xml; charset=utf-8
+fastly-request-id: daf7139b74e7fe2e4a27fee8
+server-timing: HIT, fastly;desc="Edge time";dur=0
+accept-ranges: bytes
+date: Fri, 02 Oct 2026 14:10:12 GMT
+age: 1893
+vary: Origin
+fastly-request-id: 80bae4a348f3d322f8e75d32
+server-timing: HIT-CLUSTER, fastly;desc="Edge time";dur=1
+content-length: 35687
+

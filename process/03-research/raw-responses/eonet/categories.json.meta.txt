@@ -1,0 +1,14 @@
+url: https://eonet.gsfc.nasa.gov/api/v3/categories
+fetched_at: 2026-10-02T13:59:46Z
+http_status: 200
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/1.1 200 OK
+Date: Fri, 02 Oct 2026 13:59:46 GMT
+Server: Apache
+Cache-Control: no-cache, private
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31557600
+Transfer-Encoding: chunked
+Content-Type: application/rss+xml; charset=utf-8
+

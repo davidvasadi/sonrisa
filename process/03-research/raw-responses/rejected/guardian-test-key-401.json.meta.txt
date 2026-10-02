@@ -1,0 +1,13 @@
+url: https://content.guardianapis.com/search?api-key=test
+fetched_at: 2026-10-02T14:03:35Z
+http_status: 401
+user_agent: sonrisa-research/0.1 (take-home demo; local research script)
+
+HTTP/2 401 
+date: Fri, 02 Oct 2026 14:03:35 GMT
+content-type: application/json; charset=utf-8
+content-length: 31
+set-cookie: AWSALB=eBwlmA67JaYoUwW9aYLWLhAVvwq1lZ0Rdku3t/FQJh2OJJ6uNJtkaaFXbQ8j3eVtZyS+bjswQ+33+RwcmbHyfQWq5URZ2piImA5dRvaUrWWYb4gJnEqW8aXX8hZT; Expires=Fri, 09 Oct 2026 14:03:35 GMT; Path=/
+set-cookie: AWSALBCORS=eBwlmA67JaYoUwW9aYLWLhAVvwq1lZ0Rdku3t/FQJh2OJJ6uNJtkaaFXbQ8j3eVtZyS+bjswQ+33+RwcmbHyfQWq5URZ2piImA5dRvaUrWWYb4gJnEqW8aXX8hZT; Expires=Fri, 09 Oct 2026 14:03:35 GMT; Path=/; SameSite=None; Secure
+www-authenticate: Key
+
