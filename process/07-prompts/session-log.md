@@ -34,3 +34,21 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-002-fix-p001-transcript.md](transcripts/P-002-fix-p001-transcript.md).
 - Result summary: P-001 transcript now holds the complete prompt; R-001 logged; README title changed to "Sonrisa".
 - Follow-up: [R-001](../06-ai-review/ai-review-log.md#r-001-p-001-transcript-was-not-verbatim)
+
+## P-003: Brief analysis
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Get the AI's independent reading of the brief (ambiguities, default assumptions, missing requirements, risks) before sharing my own decisions, so the two can be compared.
+- Prompt: Verbatim in [transcripts/P-003-brief-analysis.md](transcripts/P-003-brief-analysis.md).
+- Result summary: [brief-analysis.md](../03-research/brief-analysis.md) written from the brief only: 12 ambiguities with default assumptions, 13 missing requirements, 8 ranked risks, PM questions, and a proposed interpretation marked as pending.
+- Follow-up: to be reviewed against my decisions
+
+## P-004: Commit brief analysis
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Commit the AI's unreviewed brief analysis before I share my own decisions, so the git history shows what the AI produced independently.
+- Prompt: Verbatim in [transcripts/P-004-commit-analysis.md](transcripts/P-004-commit-analysis.md).
+- Result summary: Brief analysis, P-003 and P-004 committed.
+- Follow-up: none
