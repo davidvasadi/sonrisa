@@ -14,7 +14,7 @@ Two kinds of entry:
 
 - **Decided ([D-013](../05-decisions/decision-log.md#d-013-categories-come-from-the-sources-not-a-fixed-list), supersedes D-002):** There is no fixed list of topics. The selectable categories are the ones the chosen sources actually offer. The user subscribes to any combination of them. The list comes out of research and is not invented.
 - **Working assumption:** The brief's examples (breaking news, market movements, natural disasters) guide which sources to look for. They are not the category list.
-- **Consequence:** Users choose *what kind* of event they want, but "important" still needs a system-level floor per source (e.g. a minimum severity). That floor depends on the fields each source really has. *(Open, see Q1.)*
+- **Decided ([D-018](../05-decisions/decision-log.md#d-018-no-importance-filter-the-source-decides)):** There is no system-level importance floor and no severity filter. Everything a source publishes in a category the user picked is delivered. "Important" means "the source chose to publish it". If a source publishes too much, research picks a different source instead of filtering.
 - **Working assumption:** We consume sources that already emit discrete, structured events. We do not build event detection from raw signals (e.g. clustering news articles).
 - **Decided ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)):** Every source is normalised into one common event format (source, category, title, time, location, severity, link, external ID). Deduplication and matching depend on it, so it is core scope.
 - **Decided ([D-005](../05-decisions/decision-log.md#d-005-deduplicate-events-and-notifications)):** Events are deduplicated, and notifications are deduplicated separately.
@@ -54,7 +54,7 @@ Two kinds of entry:
 
 | # | Question | Status |
 | --- | --- | --- |
-| Q1 | What makes an event "important" enough to deliver, per source? | **Open.** D-013 narrowed it: users now choose categories, but each source still needs a system-level floor. Research answers it, using the severity fields each source really has |
+| Q1 | What makes an event "important" enough to deliver, per source? | **Closed** ([D-018](../05-decisions/decision-log.md#d-018-no-importance-filter-the-source-decides)): no floor and no filter. The source's own publishing decision defines importance; source choice controls volume |
 | Q2 | Is there a free, keyless, legitimately usable source of market data? | **Rule set** ([D-016](../05-decisions/decision-log.md#d-016-drop-markets-if-they-need-a-key-or-registration)): if it needs a key or registration, markets are dropped. Research still has to check |
 | Q3 | How does the user view know which user it is, without auth? | **Resolved** ([D-015](../05-decisions/decision-log.md#d-015-simple-user-picker)): simple user picker |
 | Q4 | Does any chosen free source actually offer push? | **Rule set** ([D-017](../05-decisions/decision-log.md#d-017-accepted-ai-recommendations)): push only where verified. Research checks each source |
@@ -65,7 +65,7 @@ Two kinds of entry:
 
 Raised in the [brief analysis](../03-research/brief-analysis.md) and deferred by the author ([D-012](../05-decisions/decision-log.md#d-012-defer-remaining-extras-to-later)):
 
-- Per-user filters within a category (region, keyword, minimum severity)
+- Per-user filters within a category (region, keyword). A severity filter is excluded by D-018, not deferred
 - Re-notifying when an event is revised (e.g. an earthquake's magnitude is updated)
 - Per-user rate limits and cooldowns
 - Hysteresis for market alerts that oscillate around a threshold (only relevant if markets survive D-016)

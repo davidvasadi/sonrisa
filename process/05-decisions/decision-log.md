@@ -208,3 +208,16 @@ All entries below were decided by the author in [P-005](../07-prompts/session-lo
 - Why: Author confirmed in P-006.
 - AI involvement: All five were proposed by the AI.
 - Consequences / trade-offs: See the decisions each one refines: D-001, D-003, D-005, D-006, D-007, D-009.
+
+## D-018: No importance filter, the source decides
+
+- Date: 2026-10-02
+- Status: accepted (closes Q1)
+- Context: After D-013 the AI kept Q1 open: it proposed a system-level floor per source (e.g. a minimum severity) to define "important".
+- Options considered:
+  1. A system-level minimum per source, based on severity or magnitude fields (the AI's proposal).
+  2. No floor and no filter. Users get everything the source publishes in the categories they picked. Volume is controlled by which sources are chosen.
+- Decision: Option 2. No minimum level and no severity filter. If a source sends too much, research picks a different source; the system does not filter.
+- Why: Author decision. *AI note:* this delegates the definition of "important" to the source's own editorial judgement (e.g. a curated alert feed instead of a raw one). That makes it explicit and inspectable, and removes thresholds the system would have had to justify.
+- AI involvement: Rejects the severity floor the AI proposed in its reply to [P-006](../07-prompts/session-log.md#p-006-decision-revisions) (Q1). Rejected in [P-007](../07-prompts/session-log.md#p-007-close-q1).
+- Consequences / trade-offs: Source selection becomes the main quality lever. Research must measure each category's volume from real responses, not just confirm the category exists. Sources that only offer an unfiltered firehose are ruled out. Users cannot tune volume except by unsubscribing from a category.

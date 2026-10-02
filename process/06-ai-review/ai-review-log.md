@@ -46,3 +46,14 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - What changed as a result: Assumptions and decisions D-001 to D-012 recorded. The analysis file is kept unchanged as the AI's baseline.
 - Related decision: D-001 to D-012
 - Follow-up ([P-006](../07-prompts/session-log.md#p-006-decision-revisions)): The AI's Q1 objection led the author to replace the fixed topics with categories taken from the sources (D-013 supersedes D-002). Source freshness moved into scope (D-014). Q2 and Q3 were resolved (D-016, D-015). The remaining AI recommendations were accepted (D-017). The AI-drafted "Why" texts were reviewed and confirmed by the author.
+
+## R-003: Severity floor for "important" rejected
+
+- Date: 2026-10-02
+- Prompt / session: proposed by the AI after [P-006](../07-prompts/session-log.md#p-006-decision-revisions), rejected in [P-007](../07-prompts/session-log.md#p-007-close-q1)
+- What the AI produced: A recommendation to keep Q1 open and give each source a system-level minimum level (e.g. minimum severity), to be set during research.
+- How I checked it: Weighed it against D-013. If users pick categories, a hidden system threshold on top second-guesses the source, and the threshold values would be arbitrary.
+- What I found: The floor adds a layer of filtering the system has to justify, while the same goal is reached by choosing better sources.
+- Verdict: rejected
+- What changed as a result: D-018 (no filter; source choice controls volume). Q1 closed. The research checklist now measures publishing volume per category instead of looking for severity fields.
+- Related decision: D-018

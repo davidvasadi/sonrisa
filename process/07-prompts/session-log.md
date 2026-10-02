@@ -70,3 +70,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-006-decision-revisions.md](transcripts/P-006-decision-revisions.md).
 - Result summary: D-002 superseded by D-013 (categories come from the sources); D-014 to D-017 added; AI-inferred reasons marked confirmed; assumptions updated; category inventory added to the research checklist in [data-sources.md](../03-research/data-sources.md); README states the admin view is open, local demo only.
 - Follow-up: [R-002](../06-ai-review/ai-review-log.md#r-002-brief-analysis-compared-with-author-decisions) follow-up, D-013 to D-017
+
+## P-007: Close Q1
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Reject the AI's proposed severity floor and close Q1.
+- Prompt: Verbatim in [transcripts/P-007-close-q1.md](transcripts/P-007-close-q1.md).
+- Result summary: D-018 logged; Q1 closed in assumptions; research checklist item 3 changed to measure volume per category; rejection logged as R-003.
+- Follow-up: [R-003](../06-ai-review/ai-review-log.md#r-003-severity-floor-for-important-rejected), D-018
