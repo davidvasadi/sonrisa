@@ -22,3 +22,5 @@ Also: [notes](process/notes/) and [scripts](process/scripts/).
 ## [app/](app/) — the system
 
 The implementation. Empty for now; setup and run instructions will go here once it exists.
+
+> **Local demo only.** There is no authentication: the user view uses a simple user picker, and the admin view is open to anyone who can reach the app, including all users' data and failed deliveries. Do not expose it on a network. See [D-006](process/05-decisions/decision-log.md#d-006-two-views-no-authentication).

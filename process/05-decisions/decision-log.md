@@ -20,3 +20,191 @@ Every significant decision, in the order it was made. Newest at the bottom.
 ```
 
 ## Entries
+
+All entries below were decided by the author in [P-005](../07-prompts/session-log.md#p-005-author-decisions), after the AI's [brief analysis](../03-research/brief-analysis.md). "Why" quotes the author where a reason was given. Where none was given, the AI drafted one, marked *AI-inferred, confirmed*: the author reviewed and confirmed these in [P-006](../07-prompts/session-log.md#p-006-decision-revisions). D-013 onwards come from P-006.
+
+## D-001: Channels are delivery mechanisms, one module per channel
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The brief asks for Email and Slack, and for flexibility to "add more channels later".
+- Options considered:
+  1. Code-level adapter: one module per channel behind a shared interface.
+  2. Channels configurable at runtime with no deploy.
+- Decision: A channel is a delivery mechanism (Email, Slack), not a topic. A new channel (SMS, Teams, ...) is one new module, with no change to the core.
+- Why: Author: new channels must be easy to add later.
+- AI involvement: The AI proposed the same thing in brief-analysis A10, and suggested adding a stub third channel to prove the claim. Whether to build that stub is not yet decided.
+- Consequences / trade-offs: The core (matching, dedup, scheduling) must not reference specific channels. Adding a channel needs a code change and a deploy, and that is accepted.
+
+## D-002: Three fixed topics, on/off per user
+
+- Date: 2026-10-02
+- Status: superseded by [D-013](#d-013-categories-come-from-the-sources-not-a-fixed-list)
+- Context: The brief gives examples ("breaking news, market movements, natural disasters, that kind of thing") without saying how users choose.
+- Options considered:
+  1. Per-user structured rules with filters (region, ticker, keyword, severity). This was the AI's default in A1/A7.
+  2. Fixed topics with an on/off switch per user and a channel choice per topic.
+- Decision: Option 2. The topics are **breaking news**, **economy / markets** and **natural disasters**.
+- Why: *AI-inferred, confirmed:* this is the simplest model that still delivers the brief within 24 hours, and the UI is trivial to use.
+- AI involvement: Overrides the AI's default of per-user filters (A1, A7). The AI points out that this puts the whole definition of "important" on system thresholds (open question Q1 in [assumptions](../02-plan/assumptions.md)).
+- Consequences / trade-offs: Users cannot narrow a topic (e.g. "only earthquakes near me"). Filters are listed under Later.
+
+## D-003: Push where supported, polling otherwise
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The brief says nothing about how events are detected.
+- Options considered:
+  1. Polling only (the AI's default in A2).
+  2. Push where the source offers it, polling otherwise.
+- Decision: Option 2.
+- Why: *AI-inferred, confirmed:* lower latency where a source allows it, without excluding sources that don't.
+- AI involvement: Extends the AI's polling-only default. The AI notes that few free sources offer push (Q4), so push should only be built for a verified source that has it. Author confirmed in P-006: push only where verified.
+- Consequences / trade-offs: The source interface must support both modes.
+
+## D-004: Live UI without refresh
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: Alerts and deliveries happen in the background. A static UI would hide them.
+- Decision: Both the user and admin views update live, without a page reload.
+- Why: *AI-inferred, confirmed:* the system's behaviour (events arriving, deliveries succeeding or failing) is visible as it happens. This matters for the demo.
+- AI involvement: Not raised in the AI's analysis.
+- Consequences / trade-offs: The server needs a channel to push updates to the browser, and this is one reason for D-011 (no Next.js).
+
+## D-005: Deduplicate events and notifications
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: Polling sees the same event many times, and several sources may report the same event.
+- Decision: Events are deduplicated, and notifications are deduplicated separately. A user never receives the same event twice on the same channel.
+- Why: *AI-inferred, confirmed:* duplicate alerts are the fastest way to make users mute the product.
+- AI involvement: Matches the AI's analysis (gap 2, risk 5).
+- Consequences / trade-offs: This needs stable event identity (source + external ID) and a uniqueness constraint per notification. Cross-source dedup (the same quake from two feeds) is harder and depends on the sources chosen.
+
+## D-006: Two views, no authentication
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The brief asks for an admin view and does not mention auth.
+- Options considered:
+  1. Minimal auth with user and admin roles (the AI's default in A12).
+  2. No auth. The views are separate but open.
+- Decision: Option 2. The admin sees everything, including failed deliveries, and can inject a demo event.
+- Why: *AI-inferred, confirmed:* auth costs time and shows nothing the brief asks for. Demo event injection makes the pipeline testable without waiting for a real event.
+- AI involvement: Overrides the AI's minimal-auth default (A12). The admin's control actions (disabling users or alerts, pausing sources, from A11) were not adopted; demo injection was added instead. The AI notes that the user view still needs some way to pick a user identity (Q3, resolved by [D-015](#d-015-simple-user-picker)), and recommends that injected events go through the full pipeline (accepted in P-006).
+- Consequences / trade-offs: Anyone with access to the app sees everything. This is acceptable only for a local demo, and the root README says so.
+
+## D-007: Slack OAuth if configured, webhook paste otherwise
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The brief requires Slack. The AI's default was webhook paste only (A9).
+- Decision: Slack is optional. A "Connect Slack" OAuth button appears when a Slack app is configured. Otherwise the user pastes an incoming webhook URL. Webhook URLs are masked everywhere.
+- Why: *AI-inferred, confirmed:* OAuth is the realistic product flow. Webhook paste keeps the zero-config promise (D-009).
+- AI involvement: Extends the AI's webhook-only default. The AI notes that if OAuth uses the `incoming-webhook` scope, both paths end with a webhook URL, so delivery code can be shared (accepted in P-006). Whether Slack accepts a localhost redirect (Q5) is checked when the Slack integration is built.
+- Consequences / trade-offs: Two connection flows to build and test. Secrets must be masked in the UI, API responses and logs.
+
+## D-008: Free sources, keyless where possible, verified by a real call
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The brief does not say where data comes from. AI tools are prone to inventing endpoints and response fields.
+- Decision: Free sources only, keyless where possible. Every source is verified with a real call before code is written against it, and the raw responses are stored in [raw-responses/](../03-research/raw-responses/).
+- Why: *AI-inferred, confirmed:* zero cost and zero setup for reviewers. Verification guards against hallucinated APIs.
+- AI involvement: Matches the AI's risk 2.
+- Consequences / trade-offs: Market data is the weak spot (Q2), resolved by [D-016](#d-016-drop-markets-if-they-need-a-key-or-registration).
+
+## D-009: Zero-config local run
+
+- Date: 2026-10-02
+- Status: accepted
+- Decision: `npm install && npm run dev` starts everything. No keys and no Docker are required. SMTP and Slack OAuth are optional and switch on when configured.
+- Why: *AI-inferred, confirmed:* a reviewer can run it in one step.
+- AI involvement: Not raised in the AI's analysis.
+- Consequences / trade-offs: Every external dependency needs a fallback (dev outbox, webhook paste, keyless sources). The SQLite driver must install cleanly (Q6, checked at setup). One command has to start the API, worker and web UI.
+
+## D-010: Email via SMTP if configured, dev outbox otherwise
+
+- Date: 2026-10-02
+- Status: accepted
+- Decision: Email is sent over SMTP when it is configured. Otherwise it is written to a dev outbox that is visible in the admin view.
+- Why: *AI-inferred, confirmed:* follows from D-009. Email delivery stays demonstrable without credentials.
+- AI involvement: Close to the AI's default (A9), which suggested a local capture inbox. Here the outbox is shown in the app's admin view instead.
+- Consequences / trade-offs: The outbox is a channel output, not a fake. It has to go through the same channel module as SMTP.
+
+## D-011: Stack: React + Vite + shadcn, Node + TypeScript, SQLite
+
+- Date: 2026-10-02
+- Status: accepted
+- Options considered:
+  1. Next.js.
+  2. A separate React + Vite front end and a Node + TypeScript back end.
+- Decision: Option 2, with shadcn for UI components and SQLite for storage.
+- Why: Author: not Next.js, because of the long-running worker and realtime updates.
+- AI involvement: The AI's analysis deliberately left out the stack.
+- Consequences / trade-offs: Two processes (or one server serving both) to orchestrate under `npm run dev`. SQLite fits a single-node demo. It is not a production choice for many concurrent writers.
+
+## D-012: Defer remaining extras to Later
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: The AI's brief analysis listed 13 gaps a real system needs.
+- Decision: Everything not covered by D-001 to D-011 is out of scope for the 24-hour build. The list is under "Later" in [assumptions](../02-plan/assumptions.md#later-out-of-scope-for-the-24-hour-build).
+- Why: Author: out of scope for 24 hours.
+- AI involvement: The AI argued that two items are core rather than extras: the common event model and per-channel message formatting, both of which D-002, D-005 and D-001 already require. The AI also recommended keeping a minimal version of source staleness monitoring, because of the silent-failure risk. The author accepted all three in P-006; see [D-014](#d-014-source-freshness-is-in-scope) and [D-017](#d-017-accepted-ai-recommendations).
+- Consequences / trade-offs: Unhandled behaviour (e.g. a revised earthquake magnitude, flapping market alerts) must be documented, not discovered.
+
+## D-013: Categories come from the sources, not a fixed list
+
+- Date: 2026-10-02
+- Status: accepted (supersedes [D-002](#d-002-three-fixed-topics-onoff-per-user))
+- Context: D-002 fixed three topics. The AI pointed out that with on/off topics and no user filters, system thresholds carry the whole definition of "important" (Q1). The author changed the model instead.
+- Options considered:
+  1. Three fixed topics (D-002).
+  2. Categories taken from what each source actually offers. The user picks any of them.
+- Decision: Option 2. The selectable categories are whatever the chosen sources really provide (e.g. event types, sections, feeds). The user subscribes to any combination and picks channels for each. Research must establish what categories each source has before design.
+- Why: Author: categories should come from the sources. *AI note:* this also grounds the category list in data that is verifiably there, instead of a list that sources may not support, and gives users a finer choice than three switches.
+- AI involvement: Prompted by the AI's Q1 objection to D-002. The model itself is the author's.
+- Consequences / trade-offs: The category list is data, not code, and can change when a source is added. The UI must render categories dynamically. Different sources' categories may overlap or use different granularity, and the design has to decide whether to merge or show them per source. The research step now includes a category inventory per source.
+
+## D-014: Source freshness is in scope
+
+- Date: 2026-10-02
+- Status: accepted (amends [D-012](#d-012-defer-remaining-extras-to-later))
+- Decision: The admin view shows the last successful fetch per source.
+- Why: Author accepted the AI's argument: without it, a dead source looks the same as a quiet world.
+- AI involvement: Recommended by the AI in the P-005 review.
+- Consequences / trade-offs: Every fetch records success or failure and a timestamp. Alerting on staleness stays under Later.
+
+## D-015: Simple user picker
+
+- Date: 2026-10-02
+- Status: accepted (resolves Q3)
+- Decision: With no auth (D-006), the user view has a simple user picker over seeded demo users.
+- Why: Author decision. It is the least effort that still gives preferences an owner.
+- AI involvement: The AI raised the need (Q3) and offered this option.
+- Consequences / trade-offs: Anyone can act as any user. This is acceptable for a local demo only (D-006).
+
+## D-016: Drop markets if they need a key or registration
+
+- Date: 2026-10-02
+- Status: accepted (resolves Q2)
+- Decision: Markets are included only if a source is free, keyless and needs no registration of any kind. Otherwise markets are dropped completely, with no keyed fallback.
+- Why: Author decision. Keeps D-009 (no keys) intact rather than weakening it for one category.
+- AI involvement: The AI raised the conflict between D-008 and D-009 for market data (Q2).
+- Consequences / trade-offs: The brief names "market movements" explicitly, so dropping them must be stated as a deliberate gap with its reason. Under D-013 the user simply would not see market categories.
+
+## D-017: Accepted AI recommendations
+
+- Date: 2026-10-02
+- Status: accepted
+- Decision: The author accepted these AI recommendations from the P-005 review:
+  1. A common event format and per-channel message formatting are core scope, not extras.
+  2. Injected demo events go through the full pipeline (normalise, dedup, match, deliver).
+  3. Both Slack connection paths store a webhook URL and share one delivery path.
+  4. Push ingestion is built only for a source verified to offer it (Q4).
+  5. Q5 (Slack localhost redirect) and Q6 (SQLite driver) are checked when those parts are built, not now.
+- Why: Author confirmed in P-006.
+- AI involvement: All five were proposed by the AI.
+- Consequences / trade-offs: See the decisions each one refines: D-001, D-003, D-005, D-006, D-007, D-009.

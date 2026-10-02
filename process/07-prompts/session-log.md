@@ -52,3 +52,21 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-004-commit-analysis.md](transcripts/P-004-commit-analysis.md).
 - Result summary: Brief analysis, P-003 and P-004 committed.
 - Follow-up: none
+
+## P-005: Author decisions
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Give my product and technical decisions, get the AI's disagreements, and record everything as assumptions and decisions.
+- Prompt: Verbatim in [transcripts/P-005-author-decisions.md](transcripts/P-005-author-decisions.md).
+- Result summary: [assumptions.md](../02-plan/assumptions.md) filled (decided vs working assumptions, open questions Q1–Q6, Later list); decisions D-001 to D-012 logged; comparison logged as R-002.
+- Follow-up: [R-002](../06-ai-review/ai-review-log.md#r-002-brief-analysis-compared-with-author-decisions), D-001 to D-012
+
+## P-006: Decision revisions
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Respond to the AI's objections from P-005: revise the topic model, settle open questions, confirm AI-drafted reasons.
+- Prompt: Verbatim in [transcripts/P-006-decision-revisions.md](transcripts/P-006-decision-revisions.md).
+- Result summary: D-002 superseded by D-013 (categories come from the sources); D-014 to D-017 added; AI-inferred reasons marked confirmed; assumptions updated; category inventory added to the research checklist in [data-sources.md](../03-research/data-sources.md); README states the admin view is open, local demo only.
+- Follow-up: [R-002](../06-ai-review/ai-review-log.md#r-002-brief-analysis-compared-with-author-decisions) follow-up, D-013 to D-017
