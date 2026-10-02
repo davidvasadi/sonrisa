@@ -297,5 +297,32 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Result summary:
   - **Demo items:** GDACS demo items are now one real item per event type; a test checks each type. 70 tests pass.
   - **README:** SMTP is unverified.
-  - **M7 closed:** tests, the app with inject, and the leak check pass; R-023 to R-026 are written; committed. M8 is in progress.
-- Follow-up: M8
+  - **M7 closed:** tests, the app with inject, and the leak check pass; R-023 to R-026 are written; committed (`64dbbac`).
+  - **M8 built:** a change bus with SSE; user feed, admin users and events endpoints; Slack OAuth routes from the stored docs (multipart token exchange, single-use 10-minute state, token discarded, D-022 host check on the OAuth webhook too). Web: live provider, user view, admin view, and the email outbox panel owned by its channel. Opt-in HTTPS dev mode.
+  - **Tests:** 84 pass.
+  - **Real run:** SSE through the Vite proxy is unbuffered (about 300 ms); in a real browser an injected event appeared after 4 ms, with no reload.
+  - **Fixed while checking:** the user-view layout and times (R-029); a screenshot method that raced the app (R-028).
+  - **Slack setup:** the steps were listed for the author.
+- Follow-up: [R-028](../06-ai-review/ai-review-log.md#r-028-chrome-screenshots-raced-the-app), [R-029](../06-ai-review/ai-review-log.md#r-029-feed-hid-the-settings-and-showed-ingest-times), [R-030](../06-ai-review/ai-review-log.md#r-030-sse-through-the-vite-proxy-verified)
+
+## P-029: Continue
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Continue M8 ("folytasd" is Hungarian for "continue").
+- Prompt: Verbatim in [transcripts/P-029-continue.md](transcripts/P-029-continue.md).
+- Result summary: M8 finished up to the real Slack test. This covers the HTTPS mode, the real-run checks, the screenshots, the README section and the Slack setup steps (see P-028).
+- Follow-up: the author's real Slack test
+
+## P-030: Real Slack test result, close M8
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Record the author's real Slack test (Connect Slack worked on `https://localhost`; a delivery arrived in `#new-channel`; cancel left untested). Log that real keys briefly went into `.env.example` before any commit, check `.env.example` and `.env`, then close M8 and commit.
+- Prompt: Verbatim in [transcripts/P-030-real-slack-test-close-m8.md](transcripts/P-030-real-slack-test-close-m8.md).
+- Result summary:
+  - **Secrets:** `.env.example` is identical to the committed file, with all values empty. `.env` is ignored, not tracked, not staged. The client ID and secret appear in no repo file, no commit and no session log (checked by a script that never printed them).
+  - **Recorded:** Q5 closed; D-023 done; README, data-sources and plan updated.
+  - **Close checks:** run in a clean copy without `.env` (84 tests, app, inject, SSE). That run found port 5173 already in use, and the AI's cleanup may have stopped the author's process; Vite now uses `strictPort` (R-032).
+  - **M8 committed.**
+- Follow-up: [R-027](../06-ai-review/ai-review-log.md#r-027-real-slack-keys-briefly-in-envexample), [R-031](../06-ai-review/ai-review-log.md#r-031-real-slack-test-q5-answered), [R-032](../06-ai-review/ai-review-log.md#r-032-port-5173-in-use-and-a-cleanup-that-could-stop-the-authors-process)

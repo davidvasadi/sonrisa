@@ -18,6 +18,7 @@ import {
 import { Header } from '@/components/layout/header';
 import { Main } from '@/components/layout/main';
 import { UserPicker } from '@/components/user-picker';
+import { useLive } from '@/live';
 
 // Our own small layout, built from the template's sidebar, header and main pieces.
 // It replaces the template's authenticated-layout, app-sidebar and nav-group, which
@@ -67,9 +68,20 @@ export function AppLayout({ view, users, user, onPickUser, children }: Props) {
       <SidebarInset>
         <Header fixed>
           <span className="font-medium">{nav.find((n) => n.view === view)?.label}</span>
+          <LiveDot />
         </Header>
         <Main>{children}</Main>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function LiveDot() {
+  const { connected } = useLive();
+  return (
+    <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground" title="Live updates over SSE">
+      <span className={`inline-block size-2 rounded-full ${connected ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+      {connected ? 'live' : 'offline'}
+    </span>
   );
 }

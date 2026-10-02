@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 // The template's TanStack Router was left out on purpose (D-033).
 export type View = 'user' | 'admin';
 
-const fromHash = (): View => (window.location.hash === '#/admin' ? 'admin' : 'user');
+const fromHash = (): View => (window.location.hash.startsWith('#/admin') ? 'admin' : 'user');
 
 export function useView(): View {
   const [view, setView] = useState<View>(fromHash);

@@ -191,7 +191,7 @@ The source is Slack's OAuth guide, [installing-with-oauth.html](raw-responses/sl
   - The docs describe the redirect as where Slack "will send the user back to", which suggests a browser redirect, so Slack's servers wouldn't need to reach the machine. That is an *inference*, not stated in the docs.
   - If Slack rejects `https://localhost`, the fallback is an HTTPS tunnel to the local app.
   - Either way, reviewers without a Slack app use webhook paste (D-021).
-- **Still to do:** the author's real test in M8 (D-023) settles whether `https://localhost` is accepted.
+- **Answered in M8:** the author's real test shows Slack accepts `https://localhost:5173/api/slack/oauth/callback` (D-023, Q5).
 
 The webhook doc ([incoming-webhooks.html](raw-responses/slack-docs/incoming-webhooks.html)) confirms the URL shape `https://hooks.slack.com/services/T…/B…/X…` behind D-022. It also lists errors that should not be retried: `invalid_payload`, `channel_is_archived`, `no_service`, `action_prohibited`. That matters for M7.
 

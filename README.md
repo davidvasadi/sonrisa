@@ -37,6 +37,20 @@ npm test
 
 No keys, no Docker, no `.env` needed (D-009). Everything in [.env.example](.env.example) is optional: SMTP and the Slack app switch on when set. The SQLite database is created at `app/server/data/sonrisa.db` (git-ignored); delete it to start fresh.
 
+### Connect Slack (optional)
+
+Without a Slack app, the Connect Slack button is shown disabled with a note, and you paste a `https://hooks.slack.com/...` webhook URL next to it (D-021). Only `hooks.slack.com` is accepted (D-022).
+
+To try the button, Slack requires an **HTTPS** redirect URL (Q5), so run the dev server with a self-signed certificate:
+
+```sh
+HTTPS=1 npm run dev   # https://localhost:5173 (accept the browser's certificate warning once)
+```
+
+and set in `.env`: `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_REDIRECT_URI=https://localhost:5173/api/slack/oauth/callback`. Slack accepts this `https://localhost` redirect URL: verified in the author's real test (D-023), [screenshot](process/08-screenshots/m8-slack-real-message.png). Still untested: cancelling on Slack's approval page.
+
+In the Slack app: activate Incoming Webhooks, and add the redirect URL above under OAuth & Permissions. Keys go in `.env` only, never in `.env.example`.
+
 The admin layout and UI components come from [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin) (MIT); see [app/web/THIRD-PARTY-NOTICES.md](app/web/THIRD-PARTY-NOTICES.md).
 
 > **Local demo only.** There is no authentication: the user view uses a simple user picker, and the admin view is open to anyone who can reach the app, including all users' data and failed deliveries. Do not expose it on a network. See [D-006](process/05-decisions/decision-log.md#d-006-two-views-no-authentication).

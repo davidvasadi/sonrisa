@@ -1,3 +1,4 @@
+import { bus } from './bus.js';
 import type { Channel } from './channels/types.js';
 import type { Db } from './db.js';
 import { deliver } from './dispatch.js';
@@ -58,6 +59,9 @@ export function startWorker(
       try {
         const report = await pollSource(db, source, fetch);
         log(summary(source, report));
+        bus.emit({ type: 'source.updated', sourceId: source.id });
+        const created = report.newEventIds.length + report.baselineEventIds.length;
+        if (created) bus.emit({ type: 'events.created', sourceId: source.id, count: created });
         // New events (notify = 1) go straight to matching and delivery.
         const results = await deliver(db, channels, report.newEventIds);
         if (results.length) {

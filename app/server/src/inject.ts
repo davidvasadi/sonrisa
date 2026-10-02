@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { bus } from './bus.js';
 import type { Channel } from './channels/types.js';
 import type { Db } from './db.js';
 import { deliver, type DeliveryResult } from './dispatch.js';
@@ -36,5 +37,6 @@ export async function injectDemo(
   const demoEvent = { ...event, externalIds: [`demo-${randomUUID()}`], categoryKey };
   const report = ingestDemo(db, source, demoEvent);
   const eventId = report.newEventIds[0];
+  bus.emit({ type: 'events.created', sourceId: source.id, count: 1 });
   return { eventId, deliveries: await deliver(db, channels, [eventId]) };
 }

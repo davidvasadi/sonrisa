@@ -1,3 +1,4 @@
+import { bus } from './bus.js';
 import type { Channel, ChannelConfig } from './channels/types.js';
 import type { Db } from './db.js';
 import { loadDeliveryEvent } from './message.js';
@@ -74,6 +75,7 @@ export async function dispatch(db: Db, channels: Channel[], deliveryIds: number[
     const status = error ? 'failed' : 'sent';
     done.run(status, error, error ? null : now(), row.id);
     results.push({ id: row.id, userId: row.userId, channel: row.channel, status, error });
+    bus.emit({ type: 'delivery.updated', deliveryId: row.id, userId: row.userId, status });
   }
   return results;
 }

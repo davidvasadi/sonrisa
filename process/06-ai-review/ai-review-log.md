@@ -397,3 +397,93 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
   - A test checks every type's raw `eventtype`.
   - BBC and UN News still use one item, relabelled with the chosen section. Not fixed: the author asked for GDACS only.
 - Related decision: D-017
+
+## R-027: Real Slack keys briefly in .env.example
+
+- Date: 2026-10-02
+- Prompt / session: [P-030](../07-prompts/session-log.md#p-030-real-slack-test-close-m8)
+- What happened: While setting up the real Slack test, the author first put the real Slack client ID and secret into `.env.example`, the committed template, instead of `.env`. This was the author's own mistake, not AI output.
+- How I checked it: The author caught it before any commit, moved the keys to `.env` and restored `.env.example`. The AI then verified this without printing any value:
+  - `git diff HEAD -- .env.example` changed no lines, and every value is empty;
+  - `.env` is git-ignored (`.gitignore:9`), not tracked and not staged;
+  - a script took the values from `.env` and searched every working-tree file, the whole git history (`git log --all -S`) and the Claude Code session logs that feed the transcript export.
+- What I found: The client ID and secret appear nowhere. The only match is the redirect URI (`https://localhost:5173/...`), which is public and appears in the README and tests on purpose.
+- Verdict: accepted (no leak)
+- What changed as a result: The README says keys go in `.env` only, never in `.env.example`. The secrets scan at every /milestone-done also checks that no `.env` is staged.
+- Related decision: D-009
+
+## R-028: Chrome screenshots raced the app
+
+- Date: 2026-10-02
+- Prompt / session: [P-029](../07-prompts/session-log.md#p-029-continue)
+- What the AI produced: Screenshots taken with `chrome --headless --screenshot`, and a first conclusion that the user view's settings were stuck on "Loading…".
+- How I checked it:
+  1. Called the endpoints directly: all 200 within milliseconds. No JS errors in the browser console.
+  2. Tried to count the browser's open connections: none, because Chrome had already exited.
+  3. Compared captures: the result changed from run to run.
+- What I found:
+  - `--screenshot` captures at the page's load event, before the app's API requests finish; `--timeout` only applies when the load event never comes. The "stuck" sections were a measurement artefact.
+  - With `--virtual-time-budget`, Chrome hung instead, because the open SSE connection never lets the network go idle.
+- Verdict: corrected
+- What changed as a result: [screenshot.mjs](../scripts/screenshot.mjs) drives Chrome over the DevTools protocol and waits for real page text before capturing. With `--live` it injects an event while the page stays open and waits for it to appear without a reload.
+- Related decision: D-004
+
+## R-029: Feed hid the settings and showed ingest times
+
+- Date: 2026-10-02
+- Prompt / session: [P-029](../07-prompts/session-log.md#p-029-continue)
+- What the AI produced: The first M8 user view: the live feed first (50 items), then subscriptions and channels. Each event showed `ingestedAt`.
+- How I checked it: Looked at the first full-page screenshot, not just whether the page rendered.
+- What I found:
+  - The feed pushed "My alerts" and "Channels", including the Connect Slack button, far down the page.
+  - Every first-poll item showed the same 17:42 timestamp, because it was the time *we* stored it.
+- Verdict: corrected
+- What changed as a result: Settings come first, and the feed scrolls inside a fixed height. Events show `occurredAt`, then `publishedAt`, and only then the ingest time; forecasts say "expected". The sections also now show their load errors instead of rendering nothing.
+- Related decision: none
+
+## R-030: SSE through the Vite proxy verified
+
+- Date: 2026-10-02
+- Prompt / session: [P-029](../07-prompts/session-log.md#p-029-continue)
+- What the AI produced: Live updates over SSE through the Vite dev proxy. The design had marked proxy buffering as *unverified*.
+- How I checked it:
+  1. Held a `curl -N` stream open through `:5173`, made changes, and timestamped each line.
+  2. In headless Chrome, injected a demo event while the page stayed open.
+  3. Re-ran the stream check over HTTPS.
+- What I found:
+  - Every message arrived within about 300 ms of the change that caused it, in order: `user.updated`, `events.created`, then one `delivery.updated` per channel. So it is not buffered.
+  - The browser showed the injected event 4 ms after the inject call returned, with no reload.
+  - The stream also works over HTTPS (`: connected`).
+- Verdict: accepted
+- What changed as a result: The design's unverified point is closed. The stream sends `X-Accel-Buffering: no` and a ping every 25 s.
+- Related decision: D-004
+
+## R-031: Real Slack test, Q5 answered
+
+- Date: 2026-10-02
+- Prompt / session: [P-030](../07-prompts/session-log.md#p-030-real-slack-test-close-m8)
+- What the AI produced: Connect Slack built only from the stored docs, tested only against a mock token endpoint. Q5 (does Slack accept a localhost redirect?) was still open.
+- How I checked it: The author created a free workspace and a Slack app, ran `HTTPS=1 npm run dev` and connected through the button. The author then subscribed Ada to BBC Business on Slack and injected a demo. The AI looked at both screenshots.
+- What I found:
+  - Slack accepted `https://localhost:5173/api/slack/oauth/callback`. The OAuth webhook was stored with the label `#new-channel` and shown masked. The delivery is `sent`, and the message from the "Sonrisa" app appears in the channel ([message](../08-screenshots/m8-slack-real-message.png), [admin](../08-screenshots/m8-admin-slack-sent.png)).
+  - Also visible: the BBC demo is a World story labelled "Business". That is the BBC/UN relabelling left open in R-026.
+  - Not tested: cancelling on Slack's approval page.
+- Verdict: accepted
+- What changed as a result: Q5 is closed and D-023 is done. The README says `https://localhost` works. Cancel stays *unverified*.
+- Related decision: D-007, D-021, D-023
+
+## R-032: Port 5173 in use, and a cleanup that could stop the author's process
+
+- Date: 2026-10-02
+- Prompt / session: [P-030](../07-prompts/session-log.md#p-030-real-slack-test-close-m8) (/milestone-done for M8)
+- What the AI produced:
+  - The clean-copy app check for M8.
+  - A cleanup step used since M5: `lsof -ti tcp:3001 -ti tcp:5173 | xargs kill`.
+- How I checked it: Read the web log when `GET /` returned `000`.
+- What I found:
+  - Port 5173 was already in use, so Vite silently moved to 5174 and the checks hit the wrong port.
+  - The cleanup kills *any* process on those ports. Whatever held 5173, most likely the author's own dev server from the Slack test, was very likely stopped. The data wasn't affected.
+  - Silent port switching would also break Connect Slack, because `SLACK_REDIRECT_URI` assumes `:5173`.
+- Verdict: corrected
+- What changed as a result: Vite uses `strictPort: true`, so it fails loudly instead of moving. The check was redone after confirming both ports were free, and it stopped only its own processes. The author was told.
+- Related decision: D-021

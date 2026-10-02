@@ -292,7 +292,7 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 - Decision: Automated tests send to a local mock receiver. The author creates a free Slack workspace at M7/M8, tests both connection paths for real once, and saves a screenshot.
 - Why: Author decision. Tests stay key-free and repeatable; one real send proves the integration.
 - AI involvement: Gap raised by the AI in P-015; the approach is the author's.
-- Consequences / trade-offs: The mock only proves we send what we think Slack expects; the real test and screenshot are the proof that Slack accepts it. Until that test is done, docs must call Slack delivery "tested against a mock only". Note: with D-022, tests must allow the mock's host only in test configuration, never in normal runs.
+- Consequences / trade-offs: The mock only proves we send what we think Slack expects; the real test and screenshot are the proof that Slack accepts it. **Done in M8 (P-030):** the author connected a free workspace through Connect Slack on `https://localhost`, and a demo delivery arrived in `#new-channel` ([message](../08-screenshots/m8-slack-real-message.png), [admin](../08-screenshots/m8-admin-slack-sent.png)). Not tested: cancelling on Slack's approval page. Note: with D-022, tests must allow the mock's host only in test configuration, never in normal runs.
 
 ## D-024: Market movements via BBC Business, no price feeds
 
