@@ -2,7 +2,7 @@
 # Fetch raw API responses for M3 data source research.
 #
 # Usage:  bash process/scripts/fetch-samples.sh          fetch everything
-#         bash process/scripts/fetch-samples.sh terms    fetch only lines whose dir is "terms"
+#         bash process/scripts/fetch-samples.sh terms    fetch only lines whose dir or name is "terms"
 #
 # For every line in SAMPLES below, saves into process/03-research/raw-responses/<dir>/:
 #   <name>             the response body, byte for byte as received
@@ -23,6 +23,7 @@ usgs significant_month.geojson https://earthquake.usgs.gov/earthquakes/feed/v1.0
 usgs 4.5_month.geojson https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson
 usgs 2.5_week.geojson https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson
 usgs all_day.geojson https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson
+usgs significant_day.geojson https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_day.geojson
 gdacs eventlist-default.json https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH
 gdacs rss.xml https://www.gdacs.org/xml/rss.xml
 eonet categories.json https://eonet.gsfc.nasa.gov/api/v3/categories
@@ -92,7 +93,7 @@ EOF
 ONLY="${1:-}"
 while read -r dir name url; do
   [ -z "$dir" ] && continue
-  [ -n "$ONLY" ] && [ "$dir" != "$ONLY" ] && continue
+  [ -n "$ONLY" ] && [ "$dir" != "$ONLY" ] && [ "$name" != "$ONLY" ] && continue
   mkdir -p "$OUT/$dir"
   headers=$(mktemp)
   status=$(curl -s -A "$UA" -m 60 -D "$headers" -o "$OUT/$dir/$name" -w '%{http_code}' "$url")

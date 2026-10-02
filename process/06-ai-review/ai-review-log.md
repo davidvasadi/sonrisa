@@ -174,3 +174,43 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: corrected
 - What changed as a result: The missing feeds were added to the fetch script and stored. The 30/90/365-day GDACS windows were added to the analysis script. The doc was updated to the regenerated numbers.
 - Related decision: none
+
+## R-013: Independent review of the M4 design
+
+- Date: 2026-10-02
+- Prompt / session: review run in [P-021](../07-prompts/session-log.md#p-021-design-decisions-and-independent-review), handled in [P-022](../07-prompts/session-log.md#p-022-design-review-calls)
+- What the AI produced: The M4 [design](../04-design/design.md), written by the main AI session. It was then reviewed by the read-only `code-reviewer` agent with fresh context, which reported 15 findings (2 high, 7 medium, 6 low) and 3 unverified suspicions. The report was shown to the author as is.
+- How I checked it:
+  1. The main session checked every finding against the doc and the stored files before the author decided: the line numbers, the USGS `properties.ids` of the first `significant_month` feature, the nine Slack error names in the stored webhook doc, and the five gzip UN files on disk.
+  2. The author then decided each one.
+- What I found:
+  - **None of the 15 findings was wrong.**
+  - One example in F7 was overstated. "Slack not connected" can be generic per channel; the outbox and `oauth_states` points stood.
+  - The two high findings were real design bugs:
+    - **F1:** stories in several feeds of the same poll would still reach only one feed's subscribers, despite D-028.
+    - **F2:** a second demo inject of the same USGS item would collide on its alias IDs and silently do nothing.
+
+| # | Finding | Call | What changed in the design |
+| --- | --- | --- | --- |
+| F1 | Multi-feed story in one poll not linked to all categories (high) | fix | Ingest works on a whole poll: items carry their feed, events are grouped by shared ID, all categories are linked, then Match runs |
+| F2 | Second demo inject collides on USGS alias IDs (high) | fix | Inject replaces **all** external IDs with one `demo-<uuid>` |
+| F3 | Baseline undefined for multi-feed sources; persistence unclear | fix | New `feeds` table; baseline per feed, persisted as `baselined_at` |
+| F4 | No email or log destinations, so M7 fails | fix | Email gets an `address` field; channels without fields get an on/off switch; seed data creates both destinations; `users.email` removed |
+| F5 | No mechanism for the mock receiver vs the exact host check | fix | Host is a constant; tests inject a transport through the constructor; no env or config can change the host |
+| F6 | Test plan misses D-027, D-028, D-022 and D-017 cases | fix | Test table extended with all named cases |
+| F7 | Doc claimed channels never need core DB, API or UI changes, but `outbox` and `oauth_states` are channel-specific | fix (doc made honest) | A channel may own its own table and admin panel; adding one is an addition, not a core change; no plugin system |
+| F8 | `pending` deliveries lost if `send` throws or the process stops | fix | A throw counts as `failed`; leftover `pending` rows become `failed` ("interrupted before send") at startup |
+| F9 | Slack error list incomplete; body format unverified | **won't fix**: no retries (D-030) | `retryable` flag dropped; the raw error text is stored, masked; body format marked *unverified* |
+| F10 | Timestamp formats could break forward-only string comparison | fix | One ISO 8601 UTC helper; SQLite `datetime('now')` never used |
+| F11 | Demo marker has no field | fix | `events.is_demo` |
+| F12 | Inject and tests read gzip or overwritable raw files at runtime | fix | Small uncompressed fixtures in `app/`; the app never reads `raw-responses/` |
+| F13 | Freshness per source hides one dead feed | fix | Freshness per feed in `feeds`, shown in the admin view |
+| F14 | OAuth `access_token` could be logged or stored | fix | Token discarded; raw response never logged; only Slack's `error` kept |
+| F15 | "Stub uses only its own file" listed as a test that can't fail | fix | Test row removed; the evidence is the commit diff that adds the stub |
+| S1 | Admin overview doesn't show users (plan M8) | add | Overview returns users with subscriptions and masked destinations |
+| S2 | Slack denial not handled | handle simply | Callback without `code` → "Slack not connected"; checked in the real test (D-023) |
+| S3 | GDACS `datemodified` time zone | mark | Marked *assumed UTC, unverified* |
+
+- Verdict: corrected
+- What changed as a result: The design was updated as in the table. D-030 was reworded: no `retryable` flag. The review caught two bugs that would have reached code, which confirms the plan's decision to have a reviewer with fresh context.
+- Related decision: D-022, D-023, D-027, D-028, D-030

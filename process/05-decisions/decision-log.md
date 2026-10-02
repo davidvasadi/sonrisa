@@ -31,6 +31,7 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 | D-019, D-020 | [P-009](../07-prompts/session-log.md#p-009-priorities-and-review-milestone) |
 | D-021 to D-023 | [P-016](../07-prompts/session-log.md#p-016-doc-fixes-and-slack-decisions), D-021 completed in [P-017](../07-prompts/session-log.md#p-017-review-entries-and-slack-button) |
 | D-024 to D-026 | [P-019](../07-prompts/session-log.md#p-019-m3-source-decisions) |
+| D-027 to D-031 | [P-021](../07-prompts/session-log.md#p-021-design-decisions-and-independent-review) |
 
 "Why" quotes the author where a reason was given. Where none was given in P-005, the AI drafted one, marked *AI-inferred, confirmed*: the author reviewed and confirmed these in P-006.
 
@@ -336,4 +337,59 @@ All entries below were decided by the author, after the AI's [brief analysis](..
 - Why: Author decision.
 - AI involvement: Found by the AI while answering Q5 from Slack's docs. The AI recommended keeping D-022.
 - Consequences / trade-offs: A GovSlack workspace can't receive alerts. Supporting it later means allowing one more exact host.
+
+## D-027: First poll only marks items as seen; subscriptions apply forward only
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: Without a rule, the first poll of BBC World would store about 30 existing stories and send all of them to every subscriber. M3 also showed that BBC section feeds contain old items, e.g. a 2025 story in top stories ([design](../04-design/design.md#first-poll-and-old-items)).
+- Decision:
+  1. The first successful fetch of each source stores its items with `notify = 0` and notifies nobody.
+  2. An event is delivered to a subscription only if it was ingested after the subscription was created.
+- Why: Author decision. Both rules are about "already seen", not importance, so D-018 holds.
+- AI involvement: Proposed by the AI in the M4 design draft.
+- Consequences / trade-offs:
+  - After a fresh start nothing is sent until a source publishes something new. The demo relies on inject (D-017) or a real new item.
+  - An old item that shows up in a feed later for the first time is still treated as new. Accepted.
+
+## D-028: One event can belong to several categories
+
+- Date: 2026-10-02
+- Status: accepted
+- Context: Event dedup keys on source + ID, so a story in two feeds of the same source (BBC World and Top stories; 131 of 369 UN GUIDs) is stored once. With a single category per event, subscribers of the second feed would miss it.
+- Decision: Add an `event_categories` table. A story seen in several feeds is stored once, linked to every category it appeared in. Matching uses any of its categories.
+- Why: Author decision, following the AI's recommendation.
+- AI involvement: Raised and recommended by the AI.
+- Consequences / trade-offs: A user subscribed to both sections, on the same channel, still gets the story once, because notification dedup is per event, user and channel (D-005). A category link added on a later poll can't notify anyone, because the event already exists; only categories seen when the event is first stored count for delivery. *AI note:* this edge case will be tested.
+
+## D-029: Channels are registered with one line in the channels folder
+
+- Date: 2026-10-02
+- Status: accepted (interprets [D-001](#d-001-channels-are-delivery-mechanisms-one-module-per-channel))
+- Context: D-001 says a new channel needs no core change. Channels must be registered somewhere.
+- Options considered:
+  1. An explicit registry, `server/channels/index.ts`, with one import and one array entry per channel.
+  2. Loading every file in `channels/` automatically.
+- Decision: Option 1. The registry belongs to the channels folder, not the core, so adding a registry line is not a core change.
+- Why: Author decision. It's explicit and easy to read.
+- AI involvement: The AI proposed both options and recommended option 1.
+- Consequences / trade-offs: Adding a channel such as Discord is one new file plus one line, with no change to matching, dispatch, the database, the API or the UI.
+
+## D-030: No delivery retries
+
+- Date: 2026-10-02
+- Status: accepted (confirms [D-012](#d-012-defer-remaining-extras-to-later))
+- Decision: No automatic or immediate retries. Failed deliveries are recorded with their error text and shown in the admin view. (A `retryable` flag was dropped after review finding F9: without retries nothing would read it; see [R-013](../06-ai-review/ai-review-log.md#r-013-independent-review-of-the-m4-design).)
+- Why: Author decision. Retries with backoff stay under Later.
+- AI involvement: The AI offered a single immediate retry as an option and recommended against it.
+- Consequences / trade-offs: A brief network error loses that notification. Adding retries later would first need a way to tell temporary errors from permanent ones.
+
+## D-031: Seven BBC sections
+
+- Date: 2026-10-02
+- Status: accepted (refines [D-025](#d-025-final-data-sources))
+- Decision: Offer Top stories, World, Business, Politics, Science & environment, Technology and Health. Each has a stored sample from M3.
+- Why: Author decision.
+- AI involvement: Proposed by the AI.
+- Consequences / trade-offs: More sections means one line each in the BBC module, plus a stored sample.
 

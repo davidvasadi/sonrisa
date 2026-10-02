@@ -187,3 +187,32 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-019-m3-source-decisions.md](transcripts/P-019-m3-source-decisions.md).
 - Result summary: D-024 (market movements via BBC Business, no price feeds), D-025 (final sources: USGS significant only, GDACS default list, BBC sections at the user's choice, UN News) and D-026 (GovSlack not supported) were logged. Q2 closed. README names both gaps. M3 marked done.
 - Follow-up: D-024 to D-026
+
+## P-020: Remove Slack example token, write the M4 design
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Cut Slack's example token out of the stored doc before any push, and amend the M3 commit. Then write the M4 design from the verified sources, keeping it simple and flagging overkill. Don't commit it.
+- Prompt: Verbatim in [transcripts/P-020-token-fix-and-design.md](transcripts/P-020-token-fix-and-design.md).
+- Result summary:
+  - **Token:** replaced with `[example token removed]`, the edit noted in `.meta.txt`, and the M3 commit amended (`3d087bf`). No reachable commit contains the token.
+  - **Design:** [design.md](../04-design/design.md) drafted. While checking the stored Slack docs, the AI found that the OAuth guide doesn't document `incoming_webhook` (the webhook page does), and that Slack's own example URL has no `/services/` segment, so only the host is validated. Five questions for the author.
+- Follow-up: D-027 to D-031
+
+## P-021: Design decisions and independent review
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5; review by the `code-reviewer` subagent
+- Goal: Answer the five design questions, save the USGS `significant_day` sample before any code, log the decisions, run the code-reviewer on the design and show its findings unchanged.
+- Prompt: Verbatim in [transcripts/P-021-design-decisions-and-review.md](transcripts/P-021-design-decisions-and-review.md).
+- Result summary: D-027 to D-031 logged and the design updated. The `significant_day` sample is stored; it held no events that day, and has no `bbox` key when empty. The fetch script's filter now also matches a single file name, so committed samples aren't re-fetched. Review: 15 findings (2 high, 7 medium, 6 low) and 3 suspicions, shown unchanged.
+- Follow-up: [R-013](../06-ai-review/ai-review-log.md#r-013-independent-review-of-the-m4-design)
+
+## P-022: Design review calls
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Check each review finding against the doc and the stored files, apply the author's calls (F1–F8 and F10–F15 fix; F9 won't fix), handle the three suspicions, log everything, and commit the design.
+- Prompt: Verbatim in [transcripts/P-022-design-review-calls.md](transcripts/P-022-design-review-calls.md).
+- Result summary: The AI's check found none of the 15 findings wrong; one example in F7 was overstated. The design was updated per finding, and D-030 reworded (no `retryable` flag). Everything is logged in R-013. Design committed.
+- Follow-up: [R-013](../06-ai-review/ai-review-log.md#r-013-independent-review-of-the-m4-design)
