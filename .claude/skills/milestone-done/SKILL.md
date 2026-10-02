@@ -1,7 +1,6 @@
 ---
 name: milestone-done
 description: Close a milestone. Runs tests and the app, checks process docs are up to date, exports and logs prompts, drafts AI review entries for approval, and proposes a commit. Commits only after an explicit yes.
-disable-model-invocation: true
 ---
 
 # /milestone-done

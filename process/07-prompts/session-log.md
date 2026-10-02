@@ -124,3 +124,12 @@ Every prompt given to the AI, in order. Full transcripts are in [transcripts/](t
 - Prompt: Verbatim in [transcripts/P-012-agent-skill-export.md](transcripts/P-012-agent-skill-export.md).
 - Result summary: [code-reviewer agent](../../.claude/agents/code-reviewer.md) (read-only: Read, Grep, Glob), [/milestone-done skill](../../.claude/skills/milestone-done/SKILL.md) (user-invoked only), [export-transcripts.mjs](../scripts/export-transcripts.mjs) with a `--check` leak test. First full session exported to [sessions/](transcripts/sessions/).
 - Follow-up: [R-004](../06-ai-review/ai-review-log.md#r-004-transcript-export-leak-check-tested-with-planted-leaks)
+
+## P-013: Skill invocation flag and email redaction
+
+- Date: 2026-10-02
+- Tool / model: Claude Code (VS Code extension), Claude Opus 5.5
+- Goal: Fix the /milestone-done flag that broke the y/n flow; redact emails in exported transcripts.
+- Prompt: Verbatim in [transcripts/P-013-skill-flag-and-redaction.md](transcripts/P-013-skill-flag-and-redaction.md).
+- Result summary: `disable-model-invocation` removed from the skill. The export redacts email addresses and `--check` fails on any address. The leak check's false positives were fixed and it was re-tested with planted leaks.
+- Follow-up: [R-005](../06-ai-review/ai-review-log.md#r-005-skill-flag-contradicted-the-yn-rule), [R-006](../06-ai-review/ai-review-log.md#r-006-leak-check-false-positives-after-the-session-grew)

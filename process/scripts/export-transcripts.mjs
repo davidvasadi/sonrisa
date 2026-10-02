@@ -15,6 +15,7 @@
 //           (<system-reminder>, <ide_opened_file>, <ide_selection>, ...).
 // Unwrapped: <pasted_content> tags are removed, their text is kept, because
 //           the text is the author's prompt.
+// Redacted: email addresses in prompts and replies become [email redacted].
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -38,6 +39,9 @@ const DROP_TAGS = [
 ];
 // Harness tags that are removed but whose content is kept.
 const UNWRAP_TAGS = ['pasted_content'];
+
+const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+const redact = (text) => text.replace(EMAIL, '[email redacted]');
 
 function cleanPrompt(text) {
   let out = text;
@@ -84,14 +88,15 @@ function extractTurns(entries) {
           .map((b) => b.text)
           .join('\n\n'),
       );
-      if (text) turns.push({ role: 'user', text, timestamp: e.timestamp });
+      if (text) turns.push({ role: 'user', text: redact(text), timestamp: e.timestamp });
     } else if (e.type === 'assistant') {
-      const text = blocks(e)
+      let text = blocks(e)
         .filter((b) => b.type === 'text')
         .map((b) => b.text)
         .join('\n\n')
         .trim();
       if (!text) continue;
+      text = redact(text);
       const last = turns[turns.length - 1];
       if (last?.role === 'assistant') last.text += `\n\n${text}`;
       else turns.push({ role: 'assistant', text, timestamp: e.timestamp });
@@ -168,11 +173,30 @@ function check() {
       continue;
     }
     const md = fs.readFileSync(target, 'utf8');
+    const flat = (t) => t.replace(/\s+/g, ' ');
+    const mdFlat = flat(md);
 
-    // 1. No harness tags.
+    // Text that may legitimately appear, taken from the raw blocks rather than
+    // from extractTurns, so an extraction bug can't whitelist its own leak.
+    const replyText = entries
+      .filter((e) => e.type === 'assistant' && !e.isSidechain)
+      .flatMap((e) => blocks(e).filter((b) => b.type === 'text').map((b) => b.text))
+      .join('\n');
+    const promptText = entries
+      .filter(isHumanPrompt)
+      .flatMap((e) => blocks(e).filter((b) => b.type === 'text').map((b) => cleanPrompt(b.text)))
+      .join('\n');
+    const allowedFlat = flat(`${promptText}\n${replyText}`);
+
+    // 1. No harness tags beyond those the assistant's own replies mention.
+    const count = (text, needle) => text.split(needle).length - 1;
     for (const tag of [...DROP_TAGS, ...UNWRAP_TAGS, 'command-name', 'command-args']) {
-      if (md.includes(`<${tag}`)) fail(`${sessionId}: tag <${tag}> present`);
+      const extra = count(md, `<${tag}`) - count(replyText, `<${tag}`);
+      if (extra > 0) fail(`${sessionId}: tag <${tag}> present (${extra} not from replies)`);
     }
+
+    // 1b. No email addresses.
+    for (const m of md.match(EMAIL) ?? []) fail(`${sessionId}: email address present: ${m}`);
 
     // 2. No fragment of any dropped block. A fragment is a 60-char slice from
     //    the middle of the block, so short generic strings don't false-alarm.
@@ -183,7 +207,9 @@ function check() {
       counts[kind] += 1;
       const mid = Math.floor(s.length / 2);
       const frag = s.slice(mid - 30, mid + 30);
-      if (md.replace(/\s+/g, ' ').includes(frag)) fail(`${sessionId}: ${kind} fragment found: "${frag}"`);
+      // A fragment that also occurs in allowed text (e.g. a tool output that
+      // echoes a prompt) is not a leak.
+      if (mdFlat.includes(frag) && !allowedFlat.includes(frag)) fail(`${sessionId}: ${kind} fragment found: "${frag}"`);
     };
     for (const e of entries) {
       if (e.isSidechain) {

@@ -75,3 +75,25 @@ What the AI produced, how I checked it, and what I accepted, corrected or reject
 - Verdict: accepted, after correcting the invalid test
 - What changed as a result: The check is reproducible (`--check`) and part of `/milestone-done`.
 - Related decision: none
+
+## R-005: Skill flag contradicted the y/n rule
+
+- Date: 2026-10-02
+- Prompt / session: [P-012](../07-prompts/session-log.md#p-012-code-reviewer-agent-milestone-done-skill-transcript-export), fixed in [P-013](../07-prompts/session-log.md#p-013-skill-invocation-flag-and-email-redaction)
+- What the AI produced: The `/milestone-done` skill with `disable-model-invocation: true`, so that the AI could not start it on its own.
+- How I checked it: Read the skill against the CLAUDE.md rule: the AI asks "Run /milestone-done now? (y/n)" and runs it after a yes.
+- What I found: The flag stops the AI from invoking the skill at all, including after a yes. The y/n flow in CLAUDE.md could never work. The AI had enforced "don't run without yes" twice, once in a way that broke the rule's purpose, and had not noticed that the two contradicted each other.
+- Verdict: corrected
+- What changed as a result: Flag removed. The CLAUDE.md rule alone governs when the skill runs.
+- Related decision: none
+
+## R-006: Leak check false positives after the session grew
+
+- Date: 2026-10-02
+- Prompt / session: [P-013](../07-prompts/session-log.md#p-013-skill-invocation-flag-and-email-redaction)
+- What the AI produced: The `--check` from R-004, which failed on a clean export once the session included discussion of the export itself.
+- How I checked it: Read the two reported leaks, not just the FAIL count.
+- What I found: Both were false positives. A reply mentioned `<system-reminder>` by name. A tool output that read the transcript echoed prompt 1, which is legitimately in the export. The check treated any match as a leak.
+- Verdict: corrected
+- What changed as a result: A fragment only counts as a leak if it is not in allowed text. Allowed text is built from the raw prompt and reply blocks, not from the extractor's output, so an extractor bug can't whitelist its own leak. Tags are counted beyond those the replies themselves contain. Re-tested against six planted cases: clean, thinking text, a harness tag in a prompt, a real tool result, an email address, a deleted reply. Each behaved as expected. The planted tool result also contained the author's email, which the new email check caught.
+- Related decision: none
